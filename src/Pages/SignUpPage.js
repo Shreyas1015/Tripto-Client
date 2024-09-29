@@ -376,10 +376,13 @@ export default function EnhancedSignUp() {
 
   const confirmEmailVerification = async () => {
     try {
-      const res = await axiosInstance.post("/auth/confirmEmail", {
-        email: formData.email,
-        emailOtp: formData.emailOtp,
-      });
+      const res = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/auth/confirmEmail`,
+        {
+          email: formData.email,
+          emailOtp: formData.emailOtp,
+        }
+      );
       if (res.data.success) {
         toast.success("Email verified successfully");
       }
@@ -406,10 +409,13 @@ export default function EnhancedSignUp() {
     }
 
     try {
-      const verifyEmailRes = await axiosInstance.post("/auth/confirmEmail", {
-        email: formData.email,
-        emailOtp: formData.emailOtp,
-      });
+      const verifyEmailRes = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/auth/confirmEmail`,
+        {
+          email: formData.email,
+          emailOtp: formData.emailOtp,
+        }
+      );
 
       if (!verifyEmailRes.data.success) {
         toast.error("Email OTP verification failed");
@@ -422,7 +428,7 @@ export default function EnhancedSignUp() {
       }
 
       const response = await axiosInstance.post(
-        "/auth/signup_with_verification",
+        `${process.env.REACT_APP_BASE_URL}/auth/signup_with_verification`,
         formData
       );
       toast.success("Signed Up Successfully");
