@@ -361,9 +361,10 @@ export default function EnhancedSignUp() {
 
   const handleEmailVerification = async () => {
     try {
-      const res = await axiosInstance.post("/auth/sendEmailVerification", {
-        email: formData.email,
-      });
+      const res = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/auth/sendEmailVerification`,
+        { email: formData.email }
+      );
       if (res.data.success) {
         toast.success("Email verification code sent successfully");
       }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IKContext, IKUpload } from "imagekitio-react";
 import axiosInstance from "../../API/axiosInstance";
 import TotalDocsCards from "./TotalDocsCards";
@@ -9,9 +9,6 @@ const DriversVerificationContent = () => {
   const navigate = useNavigate();
   const uid = localStorage.getItem("@secure.n.uid");
   const decryptedUID = secureLocalStorage.getItem("uid");
-
-  console.log("User Id : ", decryptedUID);
-  console.log("User Id : ", uid);
 
   const [aadharFront, setAadharFront] = useState("");
   const [aadharBack, setAadharBack] = useState("");
