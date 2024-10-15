@@ -222,7 +222,7 @@
 // export default LoginPage;
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowRight, Car } from "lucide-react";
+import { Mail, Lock, Car } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import SignUpPage from "./Pages/SignUpPage";
@@ -16,11 +16,63 @@ import PassengerOneWayTripPage from "./Pages/Passengers/PassengerOneWayTripPage"
 import RoundTripPage from "./Pages/Passengers/RoundTripPage";
 import BookingDetailsPage from "./Pages/Drivers/BookingDetailsPage";
 import PassengerCarTpeSelectionPage from "./Pages/Passengers/PassengerCarTypeSelectionPage";
+import axiosInstance from "./API/axiosInstance";
+import Loading from "./My_Components/Loading";
+import toast from "react-hot-toast";
 
 const App = () => {
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    // Request Interceptor
+    const requestInterceptor = axiosInstance.interceptors.request.use(
+      (config) => {
+        setLoading(true);
+        return config;
+      },
+      (error) => {
+        setLoading(false);
+        return Promise.reject(error);
+      }
+    );
+
+    // Response Interceptor
+    const responseInterceptor = axiosInstance.interceptors.response.use(
+      (response) => {
+        setLoading(false); // Stop loading on successful response
+        return response;
+      },
+      (error) => {
+        setLoading(false); // Stop loading on error
+
+        // Display a toast error message based on error type
+        if (error.response) {
+          // Server responded with a status code other than 2xx
+          toast.error(
+            `Error: ${error.response.data.message || "Something went wrong!"}`
+          );
+        } else if (error.request) {
+          // Request was made but no response received
+          toast.error("Error: No response from the server. Please try again.");
+        } else {
+          // Something went wrong in setting up the request
+          toast.error(`Error: ${error.message}`);
+        }
+
+        return Promise.reject(error);
+      }
+    );
+
+    // Cleanup function to remove interceptors
+    return () => {
+      axiosInstance.interceptors.request.eject(requestInterceptor);
+      axiosInstance.interceptors.response.eject(responseInterceptor);
+    };
+  }, []);
+
   return (
     <>
       <Router>
+        <Loading show={loading} />
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />

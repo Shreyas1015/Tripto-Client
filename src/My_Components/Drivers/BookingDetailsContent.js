@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
+import toast from "react-hot-toast";
 
 const BookingDetailsContent = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const BookingDetailsContent = () => {
           setBookingsData(res.data);
           console.log(res.data);
         } else {
-          alert("Error Fetching Bookings Details!");
+          toast.error("Error Fetching Bookings Details!");
         }
       } catch (error) {
         console.log(error);
@@ -40,11 +41,11 @@ const BookingDetailsContent = () => {
         { decryptedUID, bid, bookingsData }
       );
       if (res.status === 200) {
-        alert("Booking has been accepted!");
+        toast.success("Booking has been accepted!");
       }
     } catch (error) {
       console.log(error);
-      alert("Error Submitting Details , Car Type does not match");
+      toast.error("Error Submitting Details , Car Type does not match");
     }
   };
   const BackToLogin = () => {

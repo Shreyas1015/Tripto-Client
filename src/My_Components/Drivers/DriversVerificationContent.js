@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { IKContext, IKUpload } from "imagekitio-react";
 import axiosInstance from "../../API/axiosInstance";
-import TotalDocsCards from "./TotalDocsCards";
 import secureLocalStorage from "react-secure-storage";
+import toast from "react-hot-toast";
+import {
+  CheckCircle,
+  Clock,
+  X,
+  Upload,
+  Info,
+  Save,
+  RefreshCw,
+} from "lucide-react";
 
-const DriversVerificationContent = () => {
+export default function DriverDocumentVerification() {
   const navigate = useNavigate();
   const uid = localStorage.getItem("@secure.n.uid");
   const decryptedUID = secureLocalStorage.getItem("uid");
-
   const [aadharFront, setAadharFront] = useState("");
   const [aadharBack, setAadharBack] = useState("");
   const [panCardFront, setPanCardFront] = useState("");
@@ -49,12 +58,7 @@ const DriversVerificationContent = () => {
     car_type: "",
     submit_status: "",
   });
-  const [totalDocs, setTotalDocs] = useState({
-    uid: decryptedUID,
-    total_documents: "",
-    verified_documents: "",
-    pending_documents: "",
-  });
+
   const [carDetails2, setCarDetails2] = useState({
     uid: decryptedUID,
     car_name: "",
@@ -77,7 +81,6 @@ const DriversVerificationContent = () => {
     emailOtp: "",
     phone_number: "",
   });
-  const [errorMessage, setErrorMessage] = useState("");
 
   const handleEmailVerification = async () => {
     try {
@@ -91,14 +94,10 @@ const DriversVerificationContent = () => {
         alert(
           "Email verification code sent successfully to the email you previously registered with"
         );
-      } else {
-        setErrorMessage("Failed to send email verification code");
       }
     } catch (error) {
       console.error(error);
-      setErrorMessage(
-        "An error occurred while sending email verification code"
-      );
+      toast.error("An error occurred while sending email verification code");
     }
   };
 
@@ -115,12 +114,12 @@ const DriversVerificationContent = () => {
       if (res.data.success) {
         alert("Email verified successfully");
       } else {
-        setErrorMessage("Failed to verify Email Otp");
+        toast.error("Failed to verify Email Otp");
       }
     } catch (error) {
       console.error(error);
       alert("Invalid OTP");
-      setErrorMessage("Invalid Otp");
+      toast.error("Invalid Otp");
     }
   };
 
@@ -153,7 +152,7 @@ const DriversVerificationContent = () => {
 
       const response = await axiosInstance.post(
         `${process.env.REACT_APP_BASE_URL}/drivers/document_upload`,
-        formData
+        { formData, decryptedUID }
       );
 
       // Handle success
@@ -244,20 +243,6 @@ const DriversVerificationContent = () => {
       }
     };
 
-    const handleTotalDocs = async () => {
-      try {
-        const response = await axiosInstance.post(
-          `${process.env.REACT_APP_BASE_URL}/drivers/handleTotalDocs`,
-          { decryptedUID }
-        );
-
-        setTotalDocs(response.data);
-        console.log("setTotalDocs :", response.data);
-      } catch (error) {
-        console.error("Error fetching :", error.message);
-      }
-    };
-
     const fetchDcdID = async () => {
       try {
         const response = await axiosInstance.post(
@@ -289,7 +274,6 @@ const DriversVerificationContent = () => {
     fetchProfileData();
     fetchStatusIndicators();
     fetchCarDetails();
-    handleTotalDocs();
     fetchDocLinks();
     fetchDcdID();
   }, [decryptedUID]);
@@ -307,13 +291,13 @@ const DriversVerificationContent = () => {
       );
 
       if (!verifyEmailRes.data.success) {
-        setErrorMessage("Email OTP verification failed");
+        toast.error("Email OTP verification failed");
         return;
       }
 
       const res = await axiosInstance.post(
         `${process.env.REACT_APP_BASE_URL}/drivers/updateProfile`,
-        updatedProfileData
+        { updatedProfileData, decryptedUID }
       );
 
       if (res.status === 200) {
@@ -360,11 +344,11 @@ const DriversVerificationContent = () => {
 
   const handleCarForm = async (e) => {
     e.preventDefault();
-
+    console.log(carDetails);
     try {
       const res = await axiosInstance.post(
         `${process.env.REACT_APP_BASE_URL}/drivers/uploadCarDetails`,
-        carDetails
+        { carDetails, decryptedUID }
       );
 
       console.log("Response status:", res.status);
@@ -419,1068 +403,1194 @@ const DriversVerificationContent = () => {
   const urlEndpoint = "https://ik.imagekit.io/TriptoServices";
 
   return (
-    <div className="container-fluid">
-      <div className="profile-div mb-4">
-        <h2>Drivers Profile</h2>
-        <hr />
-        <div className="row my-5">
-          <div className="col-lg-3 border-end border-dark border-2 text-center">
-            <img
-              className="img-fluid profile-img"
-              src={docsView.selfie}
-              alt="Not available"
-            />
-          </div>
-          <div className="col-lg-9 p-4 ">
-            <form onSubmit={handleProfileEdit}>
-              <input type="hidden" name="uid" value={decryptedUID} />
-              <div className="input-group mb-3">
-                <span className="input-group-text">Name</span>
-                <input
-                  name="name"
-                  type="text"
-                  className="form-control"
-                  onChange={handleChange}
-                  value={profileData.name}
-                />
-              </div>
-              <div className="row">
-                <div className="col-lg-6">
-                  <div className="input-group mb-3">
-                    <span className="input-group-text">Email</span>
-                    <input
-                      name="email"
-                      type="text"
-                      className="form-control"
-                      required
-                      value={updatedProfileData.email || ""}
-                      placeholder={profileData.email}
-                      onChange={handleChange}
-                    />
-                    <button
-                      className="btn btn-sm"
-                      type="button"
-                      style={{ backgroundColor: "#0bbfe0", color: "white" }}
-                      onClick={handleEmailVerification}
-                    >
-                      Send OTP
-                    </button>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg">
+        <div className="bg-gradient-to-r from-[#0bbfe0] to-[#077286] text-white rounded-t-lg p-4">
+          <h1 className="text-2xl">Driver Document Verification</h1>
+          <p className="text-sm opacity-80">
+            Please fill in your details and upload the required documents
+          </p>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column: Personal and Car Information */}
+            <div>
+              <div className="bg-white shadow-md rounded-lg mb-6">
+                <div className="p-4">
+                  <h2 className="text-xl font-semibold mb-4">
+                    Personal Information
+                  </h2>
+                  <div className="space-y-4">
+                    <form onSubmit={handleProfileEdit}>
+                      <input type="hidden" name="uid" value={decryptedUID} />
+
+                      <label htmlFor="name" className="block font-medium my-2">
+                        Name
+                      </label>
+                      <input
+                        name="name"
+                        type="text"
+                        className="border border-gray-300 rounded-lg w-full p-2"
+                        onChange={handleChange}
+                        value={profileData.name}
+                      />
+                      <label htmlFor="email" className="block font-medium my-2">
+                        Email
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          name="email"
+                          type="text"
+                          className="border border-gray-300 rounded-lg p-2 flex-grow"
+                          required
+                          value={updatedProfileData.email || ""}
+                          placeholder={profileData.email}
+                          onChange={handleChange}
+                        />
+                        <button
+                          className="btn bg-gradient-to-r from-[#0bbfe0] to-[#077286] text-white"
+                          type="button"
+                          onClick={handleEmailVerification}
+                        >
+                          Send OTP
+                        </button>
+                      </div>
+
+                      <label
+                        htmlFor="emailOtp"
+                        className="block font-medium my-2"
+                      >
+                        Email OTP
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          id="emailOtp"
+                          name="emailOtp"
+                          className="border border-gray-300 rounded-lg p-2 flex-grow"
+                          value={updatedProfileData.emailOtp || ""}
+                          placeholder="Enter your OTP here"
+                          onChange={handleChange}
+                          required
+                        />
+                        <button
+                          className="btn btn bg-gradient-to-r from-[#0bbfe0] to-[#077286] text-white"
+                          type="button"
+                          onClick={confirmEmailVerification}
+                        >
+                          Verify OTP
+                        </button>
+                      </div>
+
+                      <label htmlFor="phone" className="block font-medium my-2">
+                        Phone Number
+                      </label>
+                      <input
+                        name="phone_number"
+                        type="text"
+                        className="border border-gray-300 rounded-lg w-full p-2"
+                        required
+                        value={updatedProfileData.phone_number || ""}
+                        placeholder={profileData.phone_number}
+                        onChange={handleChange}
+                      />
+
+                      <input
+                        type="submit"
+                        value="Edit Profile"
+                        className="form-control bg-gradient-to-r from-[#0bbfe0] to-[#077286] text-white my-3"
+                      />
+                    </form>
                   </div>
                 </div>
-                <div className="col-lg-6">
-                  <div className="input-group">
-                    <input
-                      type="text"
-                      id="emailOtp"
-                      name="emailOtp"
-                      className="form-control"
-                      value={updatedProfileData.emailOtp || ""}
-                      placeholder="Enter your OTP here"
-                      onChange={handleChange}
-                      required
-                    />
+              </div>
+              <div className="bg-white shadow-md rounded-lg">
+                <div className="p-4 h-[505px]">
+                  <h2 className="text-xl font-semibold mb-4">
+                    Car Information
+                  </h2>
+                  <div className="space-y-4">
+                    <form onSubmit={handleCarForm}>
+                      <input type="hidden" name="uid" value={uid} />
 
-                    <button
-                      className="btn btn-sm"
-                      style={{ backgroundColor: "#0bbfe0", color: "white" }}
-                      type="button"
-                      onClick={confirmEmailVerification}
-                    >
-                      Verify OTP
-                    </button>
+                      {carDetails2.submit_status === 1 ? (
+                        <div className="">
+                          <label
+                            htmlFor="car_name"
+                            className="block font-medium my-2"
+                          >
+                            Car Name
+                          </label>
+                          <input
+                            type="text"
+                            name="car_name"
+                            className="border border-gray-300 rounded-lg w-full p-2"
+                            onChange={handleInputChange}
+                            disabled
+                            value={carDetails2.car_name}
+                          />
+                        </div>
+                      ) : (
+                        <div className="">
+                          <label
+                            htmlFor="car_name"
+                            className="block font-medium my-2"
+                          >
+                            Car Name
+                          </label>
+                          <input
+                            type="text"
+                            name="car_name"
+                            className="border border-gray-300 rounded-lg w-full p-2"
+                            onChange={handleInputChange}
+                            required
+                            placeholder={carDetails2.car_name}
+                            value={carDetails.car_name}
+                          />
+                        </div>
+                      )}
+
+                      {carDetails2.submit_status === 1 ? (
+                        <div className="">
+                          <label
+                            htmlFor="modelYear"
+                            className="block font-medium my-2"
+                          >
+                            Model Year
+                          </label>
+                          <select
+                            className="border border-gray-300 rounded-lg w-full p-2"
+                            name="model_year"
+                            onChange={handleInputChange}
+                            value={carDetails2.model_year}
+                            disabled
+                          >
+                            {generateYearOptions()}
+                          </select>
+                        </div>
+                      ) : (
+                        <div className="">
+                          <label
+                            htmlFor="modelYear"
+                            className="block font-medium my-2"
+                          >
+                            Model Year
+                          </label>
+                          <select
+                            className="border border-gray-300 rounded-lg w-full p-2"
+                            name="model_year"
+                            onChange={handleInputChange}
+                            value={carDetails.model_year}
+                          >
+                            <option>Choose Model Year</option>
+                            {generateYearOptions()}
+                          </select>
+                        </div>
+                      )}
+
+                      {carDetails2.submit_status === 1 ? (
+                        <div className="">
+                          <label
+                            htmlFor="carNumber"
+                            className="block font-medium my-2"
+                          >
+                            Car Number
+                          </label>
+                          <input
+                            type="text"
+                            name="car_number"
+                            className="border border-gray-300 rounded-lg w-full p-2"
+                            onChange={handleInputChange}
+                            value={carDetails2.car_number}
+                            disabled
+                          />
+                        </div>
+                      ) : (
+                        <div className="">
+                          <label
+                            htmlFor="carNumber"
+                            className="block font-medium my-2"
+                          >
+                            Car Number
+                          </label>
+                          <input
+                            type="text"
+                            name="car_number"
+                            className="border border-gray-300 rounded-lg w-full p-2"
+                            onChange={handleInputChange}
+                            required
+                            placeholder={carDetails2.car_number}
+                            value={carDetails.car_number}
+                          />
+                        </div>
+                      )}
+
+                      {carDetails2.submit_status === 1 ? (
+                        <div className="">
+                          <label
+                            htmlFor="carType"
+                            className="block font-medium my-2"
+                          >
+                            Car Type
+                          </label>
+                          <select
+                            name="car_type"
+                            className="border border-gray-300 rounded-lg w-full p-2"
+                            onChange={handleInputChange}
+                            disabled
+                          >
+                            <option
+                              value={
+                                carDetails2.car_type == 1
+                                  ? "4+1 ( SEDAN )"
+                                  : carDetails2.car_type == 2
+                                  ? "6+1 ( SUV , MUV )"
+                                  : "H"
+                              }
+                            >
+                              {carDetails2.car_type == 1
+                                ? "4+1 ( SEDAN )"
+                                : carDetails2.car_type == 2
+                                ? "6+1 ( SUV , MUV )"
+                                : "H"}
+                            </option>
+                          </select>
+                        </div>
+                      ) : (
+                        <div className="">
+                          <label
+                            htmlFor="carType"
+                            className="block font-medium my-2"
+                          >
+                            Car Type
+                          </label>
+                          <select
+                            name="car_type"
+                            className="border border-gray-300 rounded-lg w-full p-2"
+                            onChange={handleInputChange}
+                            required
+                            value={carDetails.car_type}
+                          >
+                            <option>Choose Car Type</option>
+                            <option value={1}>4+1 ( SEDAN )</option>
+                            <option value={2}>6+1 ( SUV , MUV )</option>
+                          </select>
+                        </div>
+                      )}
+
+                      {carDetails2.submit_status === 1 ? (
+                        <>
+                          <p className="text-success text-xs my-2">
+                            Note: Car Details Are Saved Successfully !!.
+                          </p>
+                          <input
+                            className="form-control "
+                            type="submit"
+                            disabled
+                            value="Submit"
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-danger text-xs my-2">
+                            Note: Once the Car Details is submitted, you will
+                            not be able to update it again.
+                          </p>
+                          <input
+                            className="form-control bg-gradient-to-r from-[#0bbfe0] to-[#077286] text-white my-3"
+                            type="submit"
+                            value="Submit"
+                          />
+                        </>
+                      )}
+                    </form>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="input-group mb-3">
-                <span className="input-group-text">Phone Number</span>
-                <input
-                  name="phone_number"
-                  type="text"
-                  className="form-control"
-                  required
-                  value={updatedProfileData.phone_number || ""}
-                  placeholder={profileData.phone_number}
-                  onChange={handleChange}
-                />
+            {/* Right Column: Document Uploads */}
+            <div>
+              <div className="bg-white rounded-lg shadow-md p-4">
+                <h2 className="text-xl font-semibold">Documents</h2>
+
+                <form onSubmit={handleSubmit}>
+                  <div className="h-[887px] overflow-y-auto pr-4">
+                    <div className="flex justify-between mb-4"></div>
+                    <AnimatePresence>
+                      {statusIndicators.all_documents_status === 1 ? (
+                        <>
+                          <div className="flex items-center space-x-2 mb-4">
+                            <CheckCircle size={24} />
+                            <p className="text-green-500 font-semibold">
+                              All Documents Verified
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <input type="hidden" name="uid" value={uid} />
+                          <input type="hidden" name="dcd_id" value={dcdID} />
+                          {statusIndicators.aadharFrontStatus === 1 ? (
+                            ""
+                          ) : (
+                            <div className="py-2 px-4">
+                              <label
+                                className="block text-md  mb-2"
+                                htmlFor="aadharFront"
+                              >
+                                Aadhar Card Front:
+                              </label>
+
+                              <div className="flex items-center justify-between mb-2">
+                                <IKContext
+                                  publicKey={publicKey}
+                                  urlEndpoint={urlEndpoint}
+                                  authenticator={authenticator}
+                                >
+                                  <IKUpload
+                                    required
+                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                    fileName={`${uid}_aadharFront.jpg`}
+                                    folder="Home/Tripto/drivers"
+                                    tags={["AadharFront"]}
+                                    useUniqueFileName={false}
+                                    isPrivateFile={false}
+                                    onSuccess={(r) => {
+                                      setAadharFront(r.url);
+                                      toast.success("Uploaded");
+                                    }}
+                                    onError={(e) => console.log(e)}
+                                  />
+                                </IKContext>
+                                {docsView.aadharFront ? (
+                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                    <a
+                                      className="text-decoration-none"
+                                      href={docsView.aadharFront}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                    >
+                                      View Doc
+                                    </a>
+                                  </button>
+                                ) : null}
+
+                                <span
+                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                    statusIndicators.aadharFrontStatus === 0
+                                      ? "bg-yellow-500 text-white"
+                                      : statusIndicators.aadharFrontStatus === 1
+                                      ? "bg-green-500 text-white"
+                                      : statusIndicators.aadharFrontStatus === 2
+                                      ? "bg-red-500 text-white"
+                                      : "bg-yellow-500 text-white"
+                                  }`}
+                                >
+                                  {statusIndicators.aadharFrontStatus === 0
+                                    ? "Pending"
+                                    : statusIndicators.aadharFrontStatus === 1
+                                    ? "Verified"
+                                    : statusIndicators.aadharFrontStatus === 2
+                                    ? "Rejected"
+                                    : "Pending"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          {statusIndicators.aadharBackStatus === 1 ? (
+                            ""
+                          ) : (
+                            <div className="py-2 px-4">
+                              <label
+                                className="block text-md  mb-2"
+                                htmlFor="aadharBack"
+                              >
+                                Aadhar Card Back:
+                              </label>
+
+                              <div className="flex items-center justify-between mb-2">
+                                <IKContext
+                                  publicKey={publicKey}
+                                  urlEndpoint={urlEndpoint}
+                                  authenticator={authenticator}
+                                >
+                                  <IKUpload
+                                    required
+                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                    fileName={`${uid}_aadharBack.jpg`}
+                                    folder="Home/Tripto/drivers"
+                                    tags={["AadharBack"]}
+                                    useUniqueFileName={false}
+                                    isPrivateFile={false}
+                                    onSuccess={(r) => {
+                                      setAadharBack(r.url);
+                                      alert("Uploaded");
+                                    }}
+                                    onError={(e) => console.log(e)}
+                                  />
+                                </IKContext>
+
+                                <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                  <a
+                                    className="text-decoration-none"
+                                    href={docsView.aadharBack}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    View Doc
+                                  </a>
+                                </button>
+
+                                <span
+                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                    statusIndicators.aadharBackStatus === 0
+                                      ? "bg-yellow-500 text-white"
+                                      : statusIndicators.aadharBackStatus === 1
+                                      ? "bg-green-500 text-white"
+                                      : statusIndicators.aadharBackStatus === 2
+                                      ? "bg-red-500 text-white"
+                                      : "bg-yellow-500 text-white"
+                                  }`}
+                                >
+                                  {statusIndicators.aadharBackStatus === 0
+                                    ? "Pending"
+                                    : statusIndicators.aadharBackStatus === 1
+                                    ? "Verified"
+                                    : statusIndicators.aadharBackStatus === 2
+                                    ? "Rejected"
+                                    : "Pending"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          {statusIndicators.panCardFrontStatus === 1 ? (
+                            ""
+                          ) : (
+                            <div className="py-2 px-4">
+                              <label
+                                className="block text-md  mb-2"
+                                htmlFor="panCardFront"
+                              >
+                                Pan Card Front:
+                              </label>
+
+                              <div className="flex items-center justify-between mb-2">
+                                <IKContext
+                                  publicKey={publicKey}
+                                  urlEndpoint={urlEndpoint}
+                                  authenticator={authenticator}
+                                >
+                                  <IKUpload
+                                    required
+                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                    fileName={`${uid}_panCardFront.jpg`}
+                                    folder="Home/Tripto/drivers"
+                                    tags={["panCardFront"]}
+                                    useUniqueFileName={false}
+                                    isPrivateFile={false}
+                                    onSuccess={(r) => {
+                                      setPanCardFront(r.url);
+                                      alert("Uploaded");
+                                    }}
+                                    onError={(e) => console.log(e)}
+                                  />
+                                </IKContext>
+
+                                <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                  <a
+                                    className="text-decoration-none"
+                                    href={docsView.panCardFront}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    View Doc
+                                  </a>
+                                </button>
+
+                                <span
+                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                    statusIndicators.panCardFrontStatus === 0
+                                      ? "bg-yellow-500 text-white"
+                                      : statusIndicators.panCardFrontStatus ===
+                                        1
+                                      ? "bg-green-500 text-white"
+                                      : statusIndicators.panCardFrontStatus ===
+                                        2
+                                      ? "bg-red-500 text-white"
+                                      : "bg-yellow-500 text-white"
+                                  }`}
+                                >
+                                  {statusIndicators.panCardFrontStatus === 0
+                                    ? "Pending"
+                                    : statusIndicators.panCardFrontStatus === 1
+                                    ? "Verified"
+                                    : statusIndicators.panCardFrontStatus === 2
+                                    ? "Rejected"
+                                    : "Pending"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="py-2 px-4">
+                            <label
+                              className="block text-md  mb-2"
+                              htmlFor="drivingLicenseFront"
+                            >
+                              Driving License Front:
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_drivingLicenseFront.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["drivingLicenseFront"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setDrivingLicenseFront(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.drivingLicenseFront}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.drivingLicenseFrontStatus ===
+                                  0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.drivingLicenseFrontStatus ===
+                                      1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.drivingLicenseFrontStatus ===
+                                      2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.drivingLicenseFrontStatus ===
+                                0
+                                  ? "Pending"
+                                  : statusIndicators.drivingLicenseFrontStatus ===
+                                    1
+                                  ? "Verified"
+                                  : statusIndicators.drivingLicenseFrontStatus ===
+                                    2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="py-2 px-4">
+                            <label
+                              className="block text-md  mb-2"
+                              htmlFor="drivingLicenseBack"
+                            >
+                              Driving License Back:
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_drivingLicenseBack.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["drivingLicenseBack"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setDrivingLicenseBack(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.drivingLicenseBack}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.drivingLicenseBackStatus ===
+                                  0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.drivingLicenseBackStatus ===
+                                      1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.drivingLicenseBackStatus ===
+                                      2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.drivingLicenseBackStatus === 0
+                                  ? "Pending"
+                                  : statusIndicators.drivingLicenseBackStatus ===
+                                    1
+                                  ? "Verified"
+                                  : statusIndicators.drivingLicenseBackStatus ===
+                                    2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="py-2 px-4">
+                            <label
+                              className="block text-md  mb-2"
+                              htmlFor="selfie"
+                            >
+                              Passport Size Photo:
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_selfie.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["selfie"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setSelfie(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.selfie}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.selfieStatus === 0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.selfieStatus === 1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.selfieStatus === 2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.selfieStatus === 0
+                                  ? "Pending"
+                                  : statusIndicators.selfieStatus === 1
+                                  ? "Verified"
+                                  : statusIndicators.selfieStatus === 2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="py-2 px-4">
+                            <label
+                              className="block text-md  mb-2"
+                              htmlFor="passbookOrCheque"
+                            >
+                              Passbook Or Cheque:
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_passbookOrCheque.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["passbookOrCheque"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setPassbookOrCheque(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.passbookOrCheque}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.passbookOrChequeStatus === 0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.passbookOrChequeStatus ===
+                                      1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.passbookOrChequeStatus ===
+                                      2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.passbookOrChequeStatus === 0
+                                  ? "Pending"
+                                  : statusIndicators.passbookOrChequeStatus ===
+                                    1
+                                  ? "Verified"
+                                  : statusIndicators.passbookOrChequeStatus ===
+                                    2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="py-2 px-4">
+                            <label className="block text-md  mb-2" htmlFor="rc">
+                              RC :
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_rc.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["rc"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setRc(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.rc}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.rcStatus === 0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.rcStatus === 1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.rcStatus === 2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.rcStatus === 0
+                                  ? "Pending"
+                                  : statusIndicators.rcStatus === 1
+                                  ? "Verified"
+                                  : statusIndicators.rcStatus === 2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="py-2 px-4">
+                            <label
+                              className="block text-md  mb-2"
+                              htmlFor="puc"
+                            >
+                              PUC :
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_puc.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["puc"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setPuc(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.puc}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.pucStatus === 0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.pucStatus === 1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.pucStatus === 2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.pucStatus === 0
+                                  ? "Pending"
+                                  : statusIndicators.pucStatus === 1
+                                  ? "Verified"
+                                  : statusIndicators.pucStatus === 2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="py-2 px-4">
+                            <label
+                              className="block text-md  mb-2"
+                              htmlFor="insurance"
+                            >
+                              Insurance :
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_insurance.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["insurance"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setInsurance(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.insurance}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.insuranceStatus === 0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.insuranceStatus === 1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.insuranceStatus === 2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.insuranceStatus === 0
+                                  ? "Pending"
+                                  : statusIndicators.insuranceStatus === 1
+                                  ? "Verified"
+                                  : statusIndicators.insuranceStatus === 2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="py-2 px-4">
+                            <label
+                              className="block text-md  mb-2"
+                              htmlFor="permit"
+                            >
+                              Permit :
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_permit.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["permit"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setPermit(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.permit}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.permitStatus === 0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.permitStatus === 1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.permitStatus === 2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.permitStatus === 0
+                                  ? "Pending"
+                                  : statusIndicators.permitStatus === 1
+                                  ? "Verified"
+                                  : statusIndicators.permitStatus === 2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="py-2 px-4">
+                            <label
+                              className="block text-md  mb-2"
+                              htmlFor="fitnessCertificate"
+                            >
+                              Fitness Certificate:
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_fitnessCertificate.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["fitnessCertificate"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setFitnessCertificate(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.fitnessCertificate}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.fitnessCertificateStatus ===
+                                  0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.fitnessCertificateStatus ===
+                                      1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.fitnessCertificateStatus ===
+                                      2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.fitnessCertificateStatus === 0
+                                  ? "Pending"
+                                  : statusIndicators.fitnessCertificateStatus ===
+                                    1
+                                  ? "Verified"
+                                  : statusIndicators.fitnessCertificateStatus ===
+                                    2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="py-2 px-4">
+                            <label
+                              className="block text-md  mb-2"
+                              htmlFor="taxReceipt"
+                            >
+                              Tax Receipt:
+                            </label>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <IKContext
+                                publicKey={publicKey}
+                                urlEndpoint={urlEndpoint}
+                                authenticator={authenticator}
+                              >
+                                <IKUpload
+                                  required
+                                  className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                  fileName={`${uid}_taxReceipt.jpg`}
+                                  folder="Home/Tripto/drivers"
+                                  tags={["taxReceipt"]}
+                                  useUniqueFileName={false}
+                                  isPrivateFile={false}
+                                  onSuccess={(r) => {
+                                    setTaxReceipt(r.url);
+                                    alert("Uploaded");
+                                  }}
+                                  onError={(e) => console.log(e)}
+                                />
+                              </IKContext>
+
+                              <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                <a
+                                  className="text-decoration-none"
+                                  href={docsView.taxReceipt}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Doc
+                                </a>
+                              </button>
+
+                              <span
+                                className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                  statusIndicators.taxReceiptStatus === 0
+                                    ? "bg-yellow-500 text-white"
+                                    : statusIndicators.taxReceiptStatus === 1
+                                    ? "bg-green-500 text-white"
+                                    : statusIndicators.taxReceiptStatus === 2
+                                    ? "bg-red-500 text-white"
+                                    : "bg-yellow-500 text-white"
+                                }`}
+                              >
+                                {statusIndicators.taxReceiptStatus === 0
+                                  ? "Pending"
+                                  : statusIndicators.taxReceiptStatus === 1
+                                  ? "Verified"
+                                  : statusIndicators.taxReceiptStatus === 2
+                                  ? "Rejected"
+                                  : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  {statusIndicators.all_documents_status === 1 ? (
+                    ""
+                  ) : (
+                    <input
+                      type="submit"
+                      value="Submit"
+                      className="form-control bg-gradient-to-r from-[#0bbfe0] to-[#077286] text-white my-2"
+                    />
+                  )}
+                </form>
               </div>
-              <input
-                type="submit"
-                value="Edit Profile"
-                className="form-control blue-buttons"
-              />
-            </form>
+            </div>
           </div>
         </div>
       </div>
-      <div className="car-details-div mb-5">
-        <h2>Car Details</h2>
-        <hr />
-        <form onSubmit={handleCarForm}>
-          <input type="hidden" name="uid" value={uid} />
-          <div className="row mt-5 mb-3">
-            <div className="col-lg-6">
-              {carDetails2.submit_status === 1 ? (
-                <div className="input-group ">
-                  <span className="input-group-text">Name</span>
-                  <input
-                    type="text"
-                    name="car_name"
-                    className="form-control"
-                    onChange={handleInputChange}
-                    disabled
-                    value={carDetails2.car_name}
-                  />
-                </div>
-              ) : (
-                <div className="input-group ">
-                  <span className="input-group-text">Name</span>
-                  <input
-                    type="text"
-                    name="car_name"
-                    className="form-control"
-                    onChange={handleInputChange}
-                    required
-                    placeholder={carDetails2.car_name}
-                    value={carDetails.car_name}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="col-lg-6">
-              {carDetails2.submit_status === 1 ? (
-                <div className="input-group">
-                  <label className="input-group-text">Model Year</label>
-                  <select
-                    className="form-select"
-                    name="model_year"
-                    onChange={handleInputChange}
-                    value={carDetails2.model_year}
-                    disabled
-                  >
-                    {generateYearOptions()}
-                  </select>
-                </div>
-              ) : (
-                <div className="input-group">
-                  <label className="input-group-text">Model Year</label>
-                  <select
-                    className="form-select"
-                    name="model_year"
-                    onChange={handleInputChange}
-                    value={carDetails.model_year}
-                  >
-                    <option>Choose Model Year</option>
-                    {generateYearOptions()}
-                  </select>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="row my-4">
-            <div className="col-lg-6">
-              {carDetails2.submit_status === 1 ? (
-                <div className="input-group ">
-                  <span className="input-group-text">Car Number</span>
-                  <input
-                    type="text"
-                    name="car_number"
-                    className="form-control"
-                    onChange={handleInputChange}
-                    value={carDetails2.car_number}
-                    disabled
-                  />
-                </div>
-              ) : (
-                <div className="input-group ">
-                  <span className="input-group-text">Car Number</span>
-                  <input
-                    type="text"
-                    name="car_number"
-                    className="form-control"
-                    onChange={handleInputChange}
-                    required
-                    placeholder={carDetails2.car_number}
-                    value={carDetails.car_number}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="col-lg-6">
-              {carDetails2.submit_status === 1 ? (
-                <div className="input-group">
-                  <label className="input-group-text">Car Type</label>
-                  <select
-                    name="car_type"
-                    className="form-select"
-                    onChange={handleInputChange}
-                    disabled
-                  >
-                    <option
-                      value={
-                        carDetails2.car_type == 1
-                          ? "4+1 ( SEDAN )"
-                          : carDetails2.car_type == 2
-                          ? "6+1 ( SUV , MUV )"
-                          : "H"
-                      }
-                    >
-                      {carDetails2.car_type == 1
-                        ? "4+1 ( SEDAN )"
-                        : carDetails2.car_type == 2
-                        ? "6+1 ( SUV , MUV )"
-                        : "H"}
-                    </option>
-                  </select>
-                </div>
-              ) : (
-                <div className="input-group">
-                  <label className="input-group-text">Car Type</label>
-                  <select
-                    name="car_type"
-                    className="form-select"
-                    onChange={handleInputChange}
-                    required
-                    value={carDetails.car_type}
-                  >
-                    <option>Choose Car Type</option>
-                    <option value={1}>4+1 ( SEDAN )</option>
-                    <option value={2}>6+1 ( SUV , MUV )</option>
-                  </select>
-                </div>
-              )}
-            </div>
-          </div>
-          {carDetails2.submit_status === 1 ? (
-            ""
-          ) : (
-            <>
-              <p className="text-danger">
-                Note: Once the form is submitted, you will not be able to update
-                it again.
-              </p>
-              <input
-                className="form-control blue-buttons"
-                type="submit"
-                value="Submit"
-              />
-            </>
-          )}
-        </form>
-      </div>
-      {carDetails2.submit_status === 1 ? (
-        <div className="document-div">
-          <h2>Drivers Document Verification</h2>
-          <hr />
-          <div className="row">
-            <div className="col-lg-4">
-              <TotalDocsCards
-                doc_name="Total Documents"
-                value={totalDocs.total_documents}
-              />
-            </div>
-            <div className="col-lg-4">
-              <TotalDocsCards
-                doc_name="Verified Documents"
-                value={totalDocs.verified_documents}
-              />
-            </div>
-            <div className="col-lg-4">
-              <TotalDocsCards
-                doc_name="Pending Documents"
-                value={
-                  totalDocs.pending_documents == null
-                    ? 0
-                    : totalDocs.pending_documents
-                }
-              />
-            </div>
-          </div>
-          {statusIndicators.all_documents_status === 1 ? (
-            <h4 className="text-success">
-              All Documents Have Been Successfully verified
-            </h4>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              <input type="hidden" name="uid" value={uid} />
-              <input type="hidden" name="dcd_id" value={dcdID} />
-
-              <table className="table table-bordered">
-                <thead className="text-center">
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Form</th>
-                    <th scope="col">View Doc</th>
-                    <th scope="col">Verification Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {statusIndicators.aadharFrontStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        1
-                      </th>
-                      <td className="my-2 px-3">
-                        <label className="form-label" htmlFor="aadharFront">
-                          Aadhar Card Front:
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_aadharFront.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setAadharFront(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none"
-                            href={docsView.aadharFront}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.aadharFrontStatus === 0
-                          ? "Pending"
-                          : statusIndicators.aadharFrontStatus === 1
-                          ? "Verified"
-                          : statusIndicators.aadharFrontStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.aadharBackStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        2
-                      </th>
-                      <td className="my-2 px-3">
-                        <label className="form-label" htmlFor="aadharBack">
-                          Aadhar Card Back:
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_aadharBack.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setAadharBack(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.aadharBack}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.aadharBackStatus === 0
-                          ? "Pending"
-                          : statusIndicators.aadharBackStatus === 1
-                          ? "Verified"
-                          : statusIndicators.aadharBackStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.panCardFrontStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        3
-                      </th>
-                      <td className="my-2 px-3">
-                        <label className="form-label" htmlFor="panCardFront">
-                          Pan Card Front:
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_panCardFront.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setPanCardFront(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.panCardFront}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.panCardFrontStatus === 0
-                          ? "Pending"
-                          : statusIndicators.panCardFrontStatus === 1
-                          ? "Verified"
-                          : statusIndicators.panCardFrontStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.drivingLicenseFrontStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        4
-                      </th>
-                      <td className="my-2 px-3">
-                        <label
-                          className="form-label"
-                          htmlFor="drivingLicenseFront"
-                        >
-                          Driving License Front :
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_drivingLicenseFront.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setDrivingLicenseFront(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.drivingLicenseFront}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.drivingLicenseFrontStatus === 0
-                          ? "Pending"
-                          : statusIndicators.drivingLicenseFrontStatus === 1
-                          ? "Verified"
-                          : statusIndicators.drivingLicenseFrontStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.drivingLicenseBackStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        5
-                      </th>
-                      <td className="my-2 px-3">
-                        <label
-                          className="form-label"
-                          htmlFor="drivingLicenseBack"
-                        >
-                          Driving License Back:
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_drivingLicenseBack.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setDrivingLicenseBack(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.drivingLicenseBack}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.drivingLicenseBackStatus === 0
-                          ? "Pending"
-                          : statusIndicators.drivingLicenseBackStatus === 1
-                          ? "Verified"
-                          : statusIndicators.drivingLicenseBackStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.selfieStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        6
-                      </th>
-                      <td className="my-2 px-3">
-                        <label className="form-label" htmlFor="selfie">
-                          Selfie :
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_selfie.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setSelfie(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.selfie}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.selfieStatus === 0
-                          ? "Pending"
-                          : statusIndicators.selfieStatus === 1
-                          ? "Verified"
-                          : statusIndicators.selfieStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.passbookOrChequeStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        7
-                      </th>
-                      <td className="my-2 px-3">
-                        <label
-                          className="form-label"
-                          htmlFor="passbookOrCheque"
-                        >
-                          Passbook / Cheque : ( Optional )
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              className="form-control"
-                              fileName={`${uid}_passbook/chequebook.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setPassbookOrCheque(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.passbookOrCheque}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.passbookOrChequeStatus === 0
-                          ? "Pending"
-                          : statusIndicators.passbookOrChequeStatus === 1
-                          ? "Verified"
-                          : statusIndicators.passbookOrChequeStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.rcStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        8
-                      </th>
-                      <td className="my-2 px-3">
-                        <label className="form-label" htmlFor="rc">
-                          RC
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_rc.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setRc(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.rc}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.rcStatus === 0
-                          ? "Pending"
-                          : statusIndicators.rcStatus === 1
-                          ? "Verified"
-                          : statusIndicators.rcStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.pucStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        9
-                      </th>
-                      <td className="my-2 px-3">
-                        <label className="form-label" htmlFor="puc">
-                          PUC
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_puc.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setPuc(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.puc}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.pucStatus === 0
-                          ? "Pending"
-                          : statusIndicators.pucStatus === 1
-                          ? "Verified"
-                          : statusIndicators.pucStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.insuranceStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        10
-                      </th>
-                      <td className="my-2 px-3">
-                        <label className="form-label" htmlFor="insurance">
-                          Isurance
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_insurance.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setInsurance(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.insurance}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.insuranceStatus === 0
-                          ? "Pending"
-                          : statusIndicators.insuranceStatus === 1
-                          ? "Verified"
-                          : statusIndicators.insuranceStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.permitStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        11
-                      </th>
-                      <td className="my-2 px-3">
-                        <label className="form-label" htmlFor="permit">
-                          Permit
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              required
-                              className="form-control"
-                              fileName={`${uid}_permit.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setPermit(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.permit}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.permitStatus === 0
-                          ? "Pending"
-                          : statusIndicators.permitStatus === 1
-                          ? "Verified"
-                          : statusIndicators.permitStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.fitnessCertificateStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        12
-                      </th>
-                      <td className="my-2 px-3">
-                        <label
-                          className="form-label"
-                          htmlFor="fitnessCertificate"
-                        >
-                          Fitness Certificate : ( Optional )
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              className="form-control"
-                              fileName={`${uid}_fitnessCertificate.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setFitnessCertificate(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.fitnessCertificate}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.fitnessCertificateStatus === 0
-                          ? "Pending"
-                          : statusIndicators.fitnessCertificateStatus === 1
-                          ? "Verified"
-                          : statusIndicators.fitnessCertificateStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                  {statusIndicators.taxReceiptStatus === 1 ? (
-                    ""
-                  ) : (
-                    <tr>
-                      <th className="text-center pt-4" scope="row">
-                        13
-                      </th>
-                      <td className="my-2 px-3">
-                        <label className="form-label" htmlFor="taxReceipt">
-                          Tax Receipt : ( Optional )
-                        </label>
-                        <div className="doc">
-                          <IKContext
-                            publicKey={publicKey}
-                            urlEndpoint={urlEndpoint}
-                            authenticator={authenticator}
-                          >
-                            <IKUpload
-                              className="form-control"
-                              fileName={`${uid}_taxReceipt.jpg`}
-                              folder="Home/Tripto/drivers"
-                              tags={["tag1"]}
-                              useUniqueFileName={false}
-                              isPrivateFile={false}
-                              onSuccess={(r) => {
-                                setTaxReceipt(r.url);
-                                alert("Uploaded");
-                              }}
-                              onError={(e) => console.log(e)}
-                            />
-                          </IKContext>
-                        </div>
-                      </td>
-                      <td className="text-center pt-4">
-                        <button className="btn blue-buttons">
-                          <a
-                            className="text-decoration-none "
-                            href={docsView.taxReceipt}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View Doc
-                          </a>
-                        </button>
-                      </td>
-                      <td className="text-center pt-4">
-                        {statusIndicators.taxReceiptStatus === 0
-                          ? "Pending"
-                          : statusIndicators.taxReceiptStatus === 1
-                          ? "Verified"
-                          : statusIndicators.taxReceiptStatus === 2
-                          ? "Rejected"
-                          : "Unknown"}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-
-              <input
-                className="btn form-control blue-buttons"
-                type="submit"
-                value={"Submit Documents"}
-              ></input>
-            </form>
-          )}
-        </div>
-      ) : (
-        ""
-      )}
     </div>
   );
-};
-
-export default DriversVerificationContent;
+}

@@ -229,6 +229,28 @@
   animation: moveCar 3s ease forwards;
 }
 
+.loading-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  /* White background with opacity */
+  backdrop-filter: blur(5px);
+  /* Blur effect for supported browsers */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  /* High z-index to cover other elements */
+}
+
+.loading-content {
+  position: relative;
+  z-index: 10000;
+  /* Ensure the loading text appears above the backdrop */
+}
 .success-message {
   margin-top: 20px;
   font-size: 1.5rem;
