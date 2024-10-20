@@ -135,6 +135,7 @@ import {
   TrendingUp,
   Award,
 } from "lucide-react";
+import DriversHeader from "./DriversHeader";
 
 // Mock data for demo (replace with fetched data)
 const earningsData = [
@@ -299,7 +300,7 @@ export default function DriversDashboardContent() {
 
   return (
     <div>
-      <header className="bg-gradient-to-r from-[#0bbfe0] to-[#077286] text-white p-6 rounded-b-3xl shadow-lg">
+      {/* <header className="bg-gradient-to-r from-[#0bbfe0] to-[#077286] text-white p-6 rounded-b-3xl shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
             <div className="rounded-full w-16 h-16 bg-gray-300 mr-4"></div>
@@ -322,7 +323,8 @@ export default function DriversDashboardContent() {
             </div>
           </div>
         </div>
-      </header>
+      </header> */}
+      <DriversHeader />
 
       <main className="container mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -344,7 +346,7 @@ export default function DriversDashboardContent() {
             </div>
             <div className="bg-white p-4 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Weekly Earnings</h2>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={earningsData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
@@ -362,7 +364,10 @@ export default function DriversDashboardContent() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="bg-white p-4 rounded-lg shadow">
+            <div
+              className="bg-white p-4 rounded-lg shadow overflow-scroll"
+              style={{ maxHeight: "37%" }}
+            >
               <h2 className="text-2xl font-bold">Trip History</h2>
               <div className="mt-6">
                 <AnimatePresence>

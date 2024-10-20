@@ -19,6 +19,8 @@ import PassengerCarTpeSelectionPage from "./Pages/Passengers/PassengerCarTypeSel
 import axiosInstance from "./API/axiosInstance";
 import Loading from "./My_Components/Loading";
 import toast from "react-hot-toast";
+import BusinessStatsPage from "./Pages/Admin/BusinessStatsPage";
+import AdminDriverVerificationPage from "./Pages/Admin/AdminDriverVerificationPage";
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -76,7 +78,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
-
+          {/* Passenger Routes  */}
           <>
             <Route
               path="/passengerdashboard"
@@ -92,7 +94,7 @@ const App = () => {
               element={<PassengerCarTpeSelectionPage />}
             />
           </>
-
+          {/* Driver Routes */}
           <>
             <Route
               path="/driversdocumentverification"
@@ -102,9 +104,17 @@ const App = () => {
             <Route path="/driversdashboard" element={<DriversDashboard />} />
             <Route path="/booking-details" element={<BookingDetailsPage />} />
           </>
-
-          <Route path="/forgetPass" element={<ForgetPass />} />
-          <Route path="/resetPass" element={<ResetPass />} />
+          {/* Admin Routes */}
+          <>
+            <Route
+              path="/admin-business-stats"
+              element={<BusinessStatsPage />}
+            />
+            <Route
+              path="/admin-driver-verification"
+              element={<AdminDriverVerificationPage />}
+            />
+          </>
         </Routes>
       </Router>
     </>
