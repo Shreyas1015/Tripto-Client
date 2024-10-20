@@ -1019,865 +1019,918 @@ export default function DriverDocumentVerification() {
                               </div>
                             )}
 
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="drivingLicenseFront"
-                              >
-                                Driving License Front:
-                              </label>
-
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
+                            {statusIndicators.drivingLicenseFrontStatus ===
+                            1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="drivingLicenseFront"
                                 >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_drivingLicenseFront.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["drivingLicenseFront"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setDrivingLicenseFront(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.drivingLicenseFront ? (
-                                  <>
+                                  Driving License Front:
+                                </label>
+
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_drivingLicenseFront.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["drivingLicenseFront"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setDrivingLicenseFront(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.drivingLicenseFront ? (
+                                    <>
+                                      <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                        <a
+                                          className="text-decoration-none"
+                                          href={docsView.drivingLicenseFront}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                        >
+                                          View Doc
+                                        </a>
+                                      </button>
+                                    </>
+                                  ) : null}
+
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.drivingLicenseFrontStatus ===
+                                      0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.drivingLicenseFrontStatus ===
+                                          1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.drivingLicenseFrontStatus ===
+                                          2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.drivingLicenseFrontStatus ===
+                                    0
+                                      ? "Pending"
+                                      : statusIndicators.drivingLicenseFrontStatus ===
+                                        1
+                                      ? "Verified"
+                                      : statusIndicators.drivingLicenseFrontStatus ===
+                                        2
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
+
+                                  {statusIndicators.drivingLicenseFrontStatus ===
+                                    2 &&
+                                    statusIndicators.drivingLicenseFrontRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
+
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {
+                                            statusIndicators.drivingLicenseFrontRejectReason
+                                          }
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            )}
+
+                            {statusIndicators.drivingLicenseBackStatus === 1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="drivingLicenseBack"
+                                >
+                                  Driving License Back:
+                                </label>
+
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_drivingLicenseBack.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["drivingLicenseBack"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setDrivingLicenseBack(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.drivingLicenseBack ? (
                                     <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
                                       <a
                                         className="text-decoration-none"
-                                        href={docsView.drivingLicenseFront}
+                                        href={docsView.drivingLicenseBack}
                                         target="_blank"
                                         rel="noreferrer"
                                       >
                                         View Doc
                                       </a>
                                     </button>
-                                  </>
-                                ) : null}
+                                  ) : null}
 
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.drivingLicenseFrontStatus ===
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.drivingLicenseBackStatus ===
+                                      0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.drivingLicenseBackStatus ===
+                                          1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.drivingLicenseBackStatus ===
+                                          2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.drivingLicenseBackStatus ===
                                     0
-                                      ? "bg-yellow-500 text-white"
-                                      : statusIndicators.drivingLicenseFrontStatus ===
-                                        1
-                                      ? "bg-green-500 text-white"
-                                      : statusIndicators.drivingLicenseFrontStatus ===
-                                        2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
-                                  {statusIndicators.drivingLicenseFrontStatus ===
-                                  0
-                                    ? "Pending"
-                                    : statusIndicators.drivingLicenseFrontStatus ===
-                                      1
-                                    ? "Verified"
-                                    : statusIndicators.drivingLicenseFrontStatus ===
-                                      2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
-
-                                {statusIndicators.drivingLicenseFrontStatus ===
-                                  2 &&
-                                  statusIndicators.drivingLicenseFrontRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
-
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {
-                                          statusIndicators.drivingLicenseFrontRejectReason
-                                        }
-                                      </motion.div>
-                                    </div>
-                                  )}
-                              </div>
-                            </div>
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="drivingLicenseBack"
-                              >
-                                Driving License Back:
-                              </label>
-
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
-                                >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_drivingLicenseBack.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["drivingLicenseBack"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setDrivingLicenseBack(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.drivingLicenseBack ? (
-                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
-                                    <a
-                                      className="text-decoration-none"
-                                      href={docsView.drivingLicenseBack}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View Doc
-                                    </a>
-                                  </button>
-                                ) : null}
-
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.drivingLicenseBackStatus ===
-                                    0
-                                      ? "bg-yellow-500 text-white"
+                                      ? "Pending"
                                       : statusIndicators.drivingLicenseBackStatus ===
                                         1
-                                      ? "bg-green-500 text-white"
+                                      ? "Verified"
                                       : statusIndicators.drivingLicenseBackStatus ===
                                         2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
+
                                   {statusIndicators.drivingLicenseBackStatus ===
-                                  0
-                                    ? "Pending"
-                                    : statusIndicators.drivingLicenseBackStatus ===
-                                      1
-                                    ? "Verified"
-                                    : statusIndicators.drivingLicenseBackStatus ===
-                                      2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
+                                    2 &&
+                                    statusIndicators.drivingLicenseBackRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
 
-                                {statusIndicators.drivingLicenseBackStatus ===
-                                  2 &&
-                                  statusIndicators.drivingLicenseBackRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
-
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {
-                                          statusIndicators.drivingLicenseBackRejectReason
-                                        }
-                                      </motion.div>
-                                    </div>
-                                  )}
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {
+                                            statusIndicators.drivingLicenseBackRejectReason
+                                          }
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="selfie"
-                              >
-                                Passport Size Photo:
-                              </label>
-
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
+                            )}
+                            {statusIndicators.selfieStatus === 1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="selfie"
                                 >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_selfie.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["selfie"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setSelfie(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.selfie ? (
-                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
-                                    <a
-                                      className="text-decoration-none"
-                                      href={docsView.selfie}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View Doc
-                                    </a>
-                                  </button>
-                                ) : null}
+                                  Passport Size Photo:
+                                </label>
 
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.selfieStatus === 0
-                                      ? "bg-yellow-500 text-white"
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_selfie.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["selfie"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setSelfie(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.selfie ? (
+                                    <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                      <a
+                                        className="text-decoration-none"
+                                        href={docsView.selfie}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        View Doc
+                                      </a>
+                                    </button>
+                                  ) : null}
+
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.selfieStatus === 0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.selfieStatus === 1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.selfieStatus === 2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.selfieStatus === 0
+                                      ? "Pending"
                                       : statusIndicators.selfieStatus === 1
-                                      ? "bg-green-500 text-white"
+                                      ? "Verified"
                                       : statusIndicators.selfieStatus === 2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
-                                  {statusIndicators.selfieStatus === 0
-                                    ? "Pending"
-                                    : statusIndicators.selfieStatus === 1
-                                    ? "Verified"
-                                    : statusIndicators.selfieStatus === 2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
 
-                                {statusIndicators.selfieStatus === 2 &&
-                                  statusIndicators.selfieRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
+                                  {statusIndicators.selfieStatus === 2 &&
+                                    statusIndicators.selfieRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
 
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {statusIndicators.selfieRejectReason}
-                                      </motion.div>
-                                    </div>
-                                  )}
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {statusIndicators.selfieRejectReason}
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="passbookOrCheque"
-                              >
-                                Passbook Or Cheque:
-                              </label>
-
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
+                            )}
+                            {statusIndicators.passbookOrChequeStatus === 1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="passbookOrCheque"
                                 >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_passbookOrCheque.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["passbookOrCheque"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setPassbookOrCheque(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.passbookOrCheque ? (
-                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
-                                    <a
-                                      className="text-decoration-none"
-                                      href={docsView.passbookOrCheque}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View Doc
-                                    </a>
-                                  </button>
-                                ) : null}
+                                  Passbook Or Cheque:
+                                </label>
 
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.passbookOrChequeStatus ===
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_passbookOrCheque.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["passbookOrCheque"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setPassbookOrCheque(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.passbookOrCheque ? (
+                                    <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                      <a
+                                        className="text-decoration-none"
+                                        href={docsView.passbookOrCheque}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        View Doc
+                                      </a>
+                                    </button>
+                                  ) : null}
+
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.passbookOrChequeStatus ===
+                                      0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.passbookOrChequeStatus ===
+                                          1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.passbookOrChequeStatus ===
+                                          2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.passbookOrChequeStatus ===
                                     0
-                                      ? "bg-yellow-500 text-white"
+                                      ? "Pending"
                                       : statusIndicators.passbookOrChequeStatus ===
                                         1
-                                      ? "bg-green-500 text-white"
+                                      ? "Verified"
                                       : statusIndicators.passbookOrChequeStatus ===
                                         2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
-                                  {statusIndicators.passbookOrChequeStatus === 0
-                                    ? "Pending"
-                                    : statusIndicators.passbookOrChequeStatus ===
-                                      1
-                                    ? "Verified"
-                                    : statusIndicators.passbookOrChequeStatus ===
-                                      2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
 
-                                {statusIndicators.passbookOrChequeStatus ===
-                                  2 &&
-                                  statusIndicators.passbookOrChequeRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
+                                  {statusIndicators.passbookOrChequeStatus ===
+                                    2 &&
+                                    statusIndicators.passbookOrChequeRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
 
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {
-                                          statusIndicators.passbookOrChequeRejectReason
-                                        }
-                                      </motion.div>
-                                    </div>
-                                  )}
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {
+                                            statusIndicators.passbookOrChequeRejectReason
+                                          }
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="rc"
-                              >
-                                RC :
-                              </label>
+                            )}
 
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
+                            {statusIndicators.rcStatus === 1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="rc"
                                 >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_rc.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["rc"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setRc(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.rc ? (
-                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
-                                    <a
-                                      className="text-decoration-none"
-                                      href={docsView.rc}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View Doc
-                                    </a>
-                                  </button>
-                                ) : null}
+                                  RC :
+                                </label>
 
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.rcStatus === 0
-                                      ? "bg-yellow-500 text-white"
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_rc.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["rc"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setRc(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.rc ? (
+                                    <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                      <a
+                                        className="text-decoration-none"
+                                        href={docsView.rc}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        View Doc
+                                      </a>
+                                    </button>
+                                  ) : null}
+
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.rcStatus === 0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.rcStatus === 1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.rcStatus === 2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.rcStatus === 0
+                                      ? "Pending"
                                       : statusIndicators.rcStatus === 1
-                                      ? "bg-green-500 text-white"
+                                      ? "Verified"
                                       : statusIndicators.rcStatus === 2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
-                                  {statusIndicators.rcStatus === 0
-                                    ? "Pending"
-                                    : statusIndicators.rcStatus === 1
-                                    ? "Verified"
-                                    : statusIndicators.rcStatus === 2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
 
-                                {statusIndicators.rcStatus === 2 &&
-                                  statusIndicators.rcRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
+                                  {statusIndicators.rcStatus === 2 &&
+                                    statusIndicators.rcRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
 
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {statusIndicators.rcRejectReason}
-                                      </motion.div>
-                                    </div>
-                                  )}
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {statusIndicators.rcRejectReason}
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="puc"
-                              >
-                                PUC :
-                              </label>
+                            )}
 
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
+                            {statusIndicators.pucStatus === 1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="puc"
                                 >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_puc.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["puc"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setPuc(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.puc ? (
-                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
-                                    <a
-                                      className="text-decoration-none"
-                                      href={docsView.puc}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View Doc
-                                    </a>
-                                  </button>
-                                ) : null}
+                                  PUC :
+                                </label>
 
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.pucStatus === 0
-                                      ? "bg-yellow-500 text-white"
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_puc.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["puc"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setPuc(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.puc ? (
+                                    <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                      <a
+                                        className="text-decoration-none"
+                                        href={docsView.puc}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        View Doc
+                                      </a>
+                                    </button>
+                                  ) : null}
+
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.pucStatus === 0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.pucStatus === 1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.pucStatus === 2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.pucStatus === 0
+                                      ? "Pending"
                                       : statusIndicators.pucStatus === 1
-                                      ? "bg-green-500 text-white"
+                                      ? "Verified"
                                       : statusIndicators.pucStatus === 2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
-                                  {statusIndicators.pucStatus === 0
-                                    ? "Pending"
-                                    : statusIndicators.pucStatus === 1
-                                    ? "Verified"
-                                    : statusIndicators.pucStatus === 2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
 
-                                {statusIndicators.pucStatus === 2 &&
-                                  statusIndicators.pucRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
+                                  {statusIndicators.pucStatus === 2 &&
+                                    statusIndicators.pucRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
 
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {statusIndicators.pucRejectReason}
-                                      </motion.div>
-                                    </div>
-                                  )}
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {statusIndicators.pucRejectReason}
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="insurance"
-                              >
-                                Insurance :
-                              </label>
+                            )}
 
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
+                            {statusIndicators.insuranceStatus === 1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="insurance"
                                 >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_insurance.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["insurance"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setInsurance(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.insurance ? (
-                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
-                                    <a
-                                      className="text-decoration-none"
-                                      href={docsView.insurance}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View Doc
-                                    </a>
-                                  </button>
-                                ) : null}
+                                  Insurance :
+                                </label>
 
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.insuranceStatus === 0
-                                      ? "bg-yellow-500 text-white"
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_insurance.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["insurance"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setInsurance(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.insurance ? (
+                                    <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                      <a
+                                        className="text-decoration-none"
+                                        href={docsView.insurance}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        View Doc
+                                      </a>
+                                    </button>
+                                  ) : null}
+
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.insuranceStatus === 0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.insuranceStatus === 1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.insuranceStatus === 2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.insuranceStatus === 0
+                                      ? "Pending"
                                       : statusIndicators.insuranceStatus === 1
-                                      ? "bg-green-500 text-white"
+                                      ? "Verified"
                                       : statusIndicators.insuranceStatus === 2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
-                                  {statusIndicators.insuranceStatus === 0
-                                    ? "Pending"
-                                    : statusIndicators.insuranceStatus === 1
-                                    ? "Verified"
-                                    : statusIndicators.insuranceStatus === 2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
 
-                                {statusIndicators.insuranceStatus === 2 &&
-                                  statusIndicators.insuranceRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
+                                  {statusIndicators.insuranceStatus === 2 &&
+                                    statusIndicators.insuranceRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
 
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {statusIndicators.insuranceRejectReason}
-                                      </motion.div>
-                                    </div>
-                                  )}
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {
+                                            statusIndicators.insuranceRejectReason
+                                          }
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="permit"
-                              >
-                                Permit :
-                              </label>
+                            )}
 
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
+                            {statusIndicators.permitStatus === 1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="permit"
                                 >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_permit.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["permit"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setPermit(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.permit ? (
-                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
-                                    <a
-                                      className="text-decoration-none"
-                                      href={docsView.permit}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View Doc
-                                    </a>
-                                  </button>
-                                ) : null}
+                                  Permit :
+                                </label>
 
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.permitStatus === 0
-                                      ? "bg-yellow-500 text-white"
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_permit.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["permit"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setPermit(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.permit ? (
+                                    <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                      <a
+                                        className="text-decoration-none"
+                                        href={docsView.permit}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        View Doc
+                                      </a>
+                                    </button>
+                                  ) : null}
+
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.permitStatus === 0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.permitStatus === 1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.permitStatus === 2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.permitStatus === 0
+                                      ? "Pending"
                                       : statusIndicators.permitStatus === 1
-                                      ? "bg-green-500 text-white"
+                                      ? "Verified"
                                       : statusIndicators.permitStatus === 2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
-                                  {statusIndicators.permitStatus === 0
-                                    ? "Pending"
-                                    : statusIndicators.permitStatus === 1
-                                    ? "Verified"
-                                    : statusIndicators.permitStatus === 2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
 
-                                {statusIndicators.permitStatus === 2 &&
-                                  statusIndicators.permitRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
+                                  {statusIndicators.permitStatus === 2 &&
+                                    statusIndicators.permitRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
 
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {statusIndicators.permitRejectReason}
-                                      </motion.div>
-                                    </div>
-                                  )}
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {statusIndicators.permitRejectReason}
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="fitnessCertificate"
-                              >
-                                Fitness Certificate:
-                              </label>
+                            )}
 
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
+                            {statusIndicators.fitnessCertificateStatus === 1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="fitnessCertificate"
                                 >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_fitnessCertificate.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["fitnessCertificate"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setFitnessCertificate(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.fitnessCertificate ? (
-                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
-                                    <a
-                                      className="text-decoration-none"
-                                      href={docsView.fitnessCertificate}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View Doc
-                                    </a>
-                                  </button>
-                                ) : null}
+                                  Fitness Certificate:
+                                </label>
 
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.fitnessCertificateStatus ===
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_fitnessCertificate.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["fitnessCertificate"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setFitnessCertificate(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.fitnessCertificate ? (
+                                    <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                      <a
+                                        className="text-decoration-none"
+                                        href={docsView.fitnessCertificate}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        View Doc
+                                      </a>
+                                    </button>
+                                  ) : null}
+
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.fitnessCertificateStatus ===
+                                      0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.fitnessCertificateStatus ===
+                                          1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.fitnessCertificateStatus ===
+                                          2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.fitnessCertificateStatus ===
                                     0
-                                      ? "bg-yellow-500 text-white"
+                                      ? "Pending"
                                       : statusIndicators.fitnessCertificateStatus ===
                                         1
-                                      ? "bg-green-500 text-white"
+                                      ? "Verified"
                                       : statusIndicators.fitnessCertificateStatus ===
                                         2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
+
                                   {statusIndicators.fitnessCertificateStatus ===
-                                  0
-                                    ? "Pending"
-                                    : statusIndicators.fitnessCertificateStatus ===
-                                      1
-                                    ? "Verified"
-                                    : statusIndicators.fitnessCertificateStatus ===
-                                      2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
+                                    2 &&
+                                    statusIndicators.fitnessCertificateRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
 
-                                {statusIndicators.fitnessCertificateStatus ===
-                                  2 &&
-                                  statusIndicators.fitnessCertificateRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
-
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {
-                                          statusIndicators.fitnessCertificateRejectReason
-                                        }
-                                      </motion.div>
-                                    </div>
-                                  )}
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {
+                                            statusIndicators.fitnessCertificateRejectReason
+                                          }
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="py-2 px-4">
-                              <label
-                                className="block text-md  mb-2"
-                                htmlFor="taxReceipt"
-                              >
-                                Tax Receipt:
-                              </label>
+                            )}
 
-                              <div className="flex items-center justify-between mb-2">
-                                <IKContext
-                                  publicKey={publicKey}
-                                  urlEndpoint={urlEndpoint}
-                                  authenticator={authenticator}
+                            {statusIndicators.taxReceiptStatus === 1 ? (
+                              ""
+                            ) : (
+                              <div className="py-2 px-4">
+                                <label
+                                  className="block text-md  mb-2"
+                                  htmlFor="taxReceipt"
                                 >
-                                  <IKUpload
-                                    required
-                                    className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
-                                    fileName={`${uid}_taxReceipt.jpg`}
-                                    folder="Home/Tripto/drivers"
-                                    tags={["taxReceipt"]}
-                                    useUniqueFileName={false}
-                                    isPrivateFile={false}
-                                    onSuccess={(r) => {
-                                      setTaxReceipt(r.url);
-                                      alert("Uploaded");
-                                    }}
-                                    onError={(e) => console.log(e)}
-                                  />
-                                </IKContext>
-                                {docsView.taxReceipt ? (
-                                  <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
-                                    <a
-                                      className="text-decoration-none"
-                                      href={docsView.taxReceipt}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View Doc
-                                    </a>
-                                  </button>
-                                ) : null}
+                                  Tax Receipt:
+                                </label>
 
-                                <span
-                                  className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
-                                    statusIndicators.taxReceiptStatus === 0
-                                      ? "bg-yellow-500 text-white"
+                                <div className="flex items-center justify-between mb-2">
+                                  <IKContext
+                                    publicKey={publicKey}
+                                    urlEndpoint={urlEndpoint}
+                                    authenticator={authenticator}
+                                  >
+                                    <IKUpload
+                                      required
+                                      className="form-control border border-gray-300 rounded-lg p-2 flex-1 mr-2"
+                                      fileName={`${uid}_taxReceipt.jpg`}
+                                      folder="Home/Tripto/drivers"
+                                      tags={["taxReceipt"]}
+                                      useUniqueFileName={false}
+                                      isPrivateFile={false}
+                                      onSuccess={(r) => {
+                                        setTaxReceipt(r.url);
+                                        alert("Uploaded");
+                                      }}
+                                      onError={(e) => console.log(e)}
+                                    />
+                                  </IKContext>
+                                  {docsView.taxReceipt ? (
+                                    <button className="bg-blue-500 text-white rounded-lg btn btn-sm hover:bg-blue-600 mr-2">
+                                      <a
+                                        className="text-decoration-none"
+                                        href={docsView.taxReceipt}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        View Doc
+                                      </a>
+                                    </button>
+                                  ) : null}
+
+                                  <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full inline-block ${
+                                      statusIndicators.taxReceiptStatus === 0
+                                        ? "bg-yellow-500 text-white"
+                                        : statusIndicators.taxReceiptStatus ===
+                                          1
+                                        ? "bg-green-500 text-white"
+                                        : statusIndicators.taxReceiptStatus ===
+                                          2
+                                        ? "bg-red-500 text-white"
+                                        : "bg-yellow-500 text-white"
+                                    }`}
+                                  >
+                                    {statusIndicators.taxReceiptStatus === 0
+                                      ? "Pending"
                                       : statusIndicators.taxReceiptStatus === 1
-                                      ? "bg-green-500 text-white"
+                                      ? "Verified"
                                       : statusIndicators.taxReceiptStatus === 2
-                                      ? "bg-red-500 text-white"
-                                      : "bg-yellow-500 text-white"
-                                  }`}
-                                >
-                                  {statusIndicators.taxReceiptStatus === 0
-                                    ? "Pending"
-                                    : statusIndicators.taxReceiptStatus === 1
-                                    ? "Verified"
-                                    : statusIndicators.taxReceiptStatus === 2
-                                    ? "Rejected"
-                                    : "Pending"}
-                                </span>
+                                      ? "Rejected"
+                                      : "Pending"}
+                                  </span>
 
-                                {statusIndicators.taxReceiptStatus === 2 &&
-                                  statusIndicators.taxReceiptRejectReason && (
-                                    <div className="relative ml-2">
-                                      <Info className="text-red-500 cursor-pointer" />
+                                  {statusIndicators.taxReceiptStatus === 2 &&
+                                    statusIndicators.taxReceiptRejectReason && (
+                                      <div className="relative ml-2">
+                                        <Info className="text-red-500 cursor-pointer" />
 
-                                      <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
-                                        style={{
-                                          transform: "translateX(-100%)",
-                                        }}
-                                      >
-                                        {
-                                          statusIndicators.taxReceiptRejectReason
-                                        }
-                                      </motion.div>
-                                    </div>
-                                  )}
+                                        <motion.div
+                                          initial={{ opacity: 0, y: -10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="absolute right-0 mt-2 w-48 p-2 bg-white border border-gray-300 rounded shadow-lg z-10"
+                                          style={{
+                                            transform: "translateX(-100%)",
+                                          }}
+                                        >
+                                          {
+                                            statusIndicators.taxReceiptRejectReason
+                                          }
+                                        </motion.div>
+                                      </div>
+                                    )}
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </>
                         )}
                       </AnimatePresence>
