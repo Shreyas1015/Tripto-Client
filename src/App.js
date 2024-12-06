@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import SignUpPage from "./Pages/SignUpPage";
-import ForgetPass from "./Pages/ForgetPass";
-import ResetPass from "./Pages/ResetPass";
 import PassengerDashboard from "./Pages/Passengers/PassengerDashboard";
 import PassengerHomePage from "./Pages/Passengers/PassengerHomePage";
 import PassenegerProfile from "./Pages/Passengers/PassengerProfile";
@@ -25,10 +23,12 @@ import AdminDriverVerificationPage from "./Pages/Admin/AdminDriverVerificationPa
 const App = () => {
   const [loading, setLoading] = useState(false);
   useEffect(() => {
-    // Request Interceptor
     const requestInterceptor = axiosInstance.interceptors.request.use(
       (config) => {
-        setLoading(true);
+        // Skip loading if the flag is set
+        if (!config.skipLoading) {
+          setLoading(true);
+        }
         return config;
       },
       (error) => {
@@ -37,34 +37,22 @@ const App = () => {
       }
     );
 
-    // Response Interceptor
     const responseInterceptor = axiosInstance.interceptors.response.use(
       (response) => {
-        setLoading(false); // Stop loading on successful response
+        // Skip loading if the flag is set
+        if (!response.config.skipLoading) {
+          setLoading(false);
+        }
         return response;
       },
       (error) => {
-        setLoading(false); // Stop loading on error
-
-        // Display a toast error message based on error type
-        if (error.response) {
-          // Server responded with a status code other than 2xx
-          toast.error(
-            `Error: ${error.response.data.message || "Something went wrong!"}`
-          );
-        } else if (error.request) {
-          // Request was made but no response received
-          toast.error("Error: No response from the server. Please try again.");
-        } else {
-          // Something went wrong in setting up the request
-          toast.error(`Error: ${error.message}`);
+        if (!error.config?.skipLoading) {
+          setLoading(false);
         }
-
         return Promise.reject(error);
       }
     );
 
-    // Cleanup function to remove interceptors
     return () => {
       axiosInstance.interceptors.request.eject(requestInterceptor);
       axiosInstance.interceptors.response.eject(responseInterceptor);
@@ -114,6 +102,10 @@ const App = () => {
               path="/admin-driver-verification"
               element={<AdminDriverVerificationPage />}
             />
+          </>
+          {/* Vendor Routes */}
+          <>
+            <Route path="/vendorsdashboard" element={<DriversDashboard />} />
           </>
         </Routes>
       </Router>

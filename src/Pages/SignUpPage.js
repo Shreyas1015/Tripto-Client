@@ -172,21 +172,21 @@
 //                       </div>
 //                     </div>
 //                   </div>
-//                   {/* <div
-//                     className="user-type-option col-lg-4"
-//                     onClick={() => handleUserTypeSelection("Vendor")}
-//                   >
-//                     <div className="card" style={{ width: "18rem" }}>
-//                       <img
-//                         src="/Images/avatar (2).jpeg"
-//                         className="card-img-top img-fluid"
-//                         alt=""
-//                       />
-//                       <div className="card-body">
-//                         <p className="card-text">Vendor</p>
-//                       </div>
-//                     </div>
-//                   </div> */}
+// {/* <div
+//   className="user-type-option col-lg-4"
+//   onClick={() => handleUserTypeSelection("Vendor")}
+// >
+//   <div className="card" style={{ width: "18rem" }}>
+//     <img
+//       src="/Images/avatar (2).jpeg"
+//       className="card-img-top img-fluid"
+//       alt=""
+//     />
+//     <div className="card-body">
+//       <p className="card-text">Vendor</p>
+//     </div>
+//   </div>
+// </div> */}
 //                 </div>
 //               </div>
 //             </div>
@@ -339,7 +339,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Mail, Phone, Lock, Car, ArrowRight } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  Lock,
+  Car,
+  ArrowRight,
+  BriefcaseBusinessIcon,
+} from "lucide-react";
 import axiosInstance from "../API/axiosInstance";
 import toast from "react-hot-toast";
 
@@ -544,9 +552,13 @@ export default function EnhancedSignUp() {
                 <input
                   id="phone_number"
                   name="phone_number"
+                  type="tel"
                   placeholder="Enter your phone number"
                   value={formData.phone_number}
                   onChange={handleChange}
+                  maxLength="10"
+                  pattern="\d{10}"
+                  title="Phone number must be 10 digits"
                   className="w-full border border-gray-300 pl-10 pr-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#0bbfe0]"
                   required
                 />
@@ -621,12 +633,12 @@ export default function EnhancedSignUp() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-white rounded-lg p-10 max-w-3xl w-full">
             <h2 className="text-xl font-bold mb-4">Select User Type</h2>
             <p className="text-gray-500 mb-4">
               Choose your role in the TRIPTO ecosystem
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <button
                 onClick={() => handleUserTypeSelection(2)}
                 className="border border-[#0bbfe0] text-[#0bbfe0] py-4 rounded-lg flex flex-col items-center hover:bg-[#0bbfe0] hover:text-white transition-colors"
@@ -640,6 +652,13 @@ export default function EnhancedSignUp() {
               >
                 <Car className="h-16 w-16 mb-2" />
                 <span>Driver</span>
+              </button>
+              <button
+                onClick={() => handleUserTypeSelection(4)}
+                className="border border-[#0bbfe0] text-[#0bbfe0] py-4 rounded-lg flex flex-col items-center hover:bg-[#0bbfe0] hover:text-white transition-colors"
+              >
+                <BriefcaseBusinessIcon className="h-16 w-16 mb-2" />
+                <span>Vendor</span>
               </button>
             </div>
           </div>

@@ -148,7 +148,6 @@ const earningsData = [
   { name: "Sun", earnings: 280 },
 ];
 
-const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const months = [
   "January",
   "February",
@@ -366,7 +365,7 @@ export default function DriversDashboardContent() {
           <div className="lg:col-span-2">
             <div
               className="bg-white p-4 rounded-lg shadow overflow-scroll"
-              style={{ maxHeight: "37%" }}
+              style={{ height: "31.5rem" }}
             >
               <h2 className="text-2xl font-bold">Trip History</h2>
               <div className="mt-6">

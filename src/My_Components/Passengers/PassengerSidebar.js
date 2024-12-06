@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
+import toast from "react-hot-toast";
 
 const PassengerSidebar = (props) => {
   const navigate = useNavigate();
@@ -38,12 +39,12 @@ const PassengerSidebar = (props) => {
       if (response.status === 200) {
         window.localStorage.removeItem("user_type");
         navigate("/");
-        alert("Logged Out Successfully");
+        toast.error("Logged Out Successfully");
       } else {
-        console.error("Logout failed:", response.error);
+        toast.error("Logout failed:", response.error);
       }
     } catch (error) {
-      console.error("Error during logout:", error.message);
+      toast.error("Error during logout:", error.message);
     }
   };
 

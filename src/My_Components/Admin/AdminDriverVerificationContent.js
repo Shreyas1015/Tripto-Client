@@ -527,7 +527,24 @@ const DriverDocuments = ({ driverId, onBackToList }) => {
   };
 
   const isNewUpload = (documentUpdatedAt, reasonUpdatedAt) => {
-    return new Date(documentUpdatedAt) > new Date(reasonUpdatedAt);
+    const docUpdatedAt = new Date(documentUpdatedAt);
+    const reasonUpdatedAtDate = reasonUpdatedAt
+      ? new Date(reasonUpdatedAt)
+      : null;
+
+    console.log("Comparing dates:");
+    console.log("Document Updated At:", docUpdatedAt);
+    console.log("Reason Updated At:", reasonUpdatedAtDate);
+
+    if (!reasonUpdatedAtDate) {
+      console.log("Reason Updated At is null, returning false");
+      return false;
+    }
+
+    const isNew = docUpdatedAt > reasonUpdatedAtDate;
+    console.log(isNew ? "True" : "False");
+
+    return isNew;
   };
 
   if (!driverData) return <div>Loading...</div>;

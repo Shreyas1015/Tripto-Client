@@ -189,6 +189,7 @@ const DriversHomeContent = () => {
         // Optionally, update the state by removing the accepted booking
         const updatedBookings = bookingsData.filter((item) => item.bid !== bid);
         setBookingsData(updatedBookings);
+        navigate(`/driversdashboard?uid=${uid}`);
       }
     } catch (error) {
       console.log(error);

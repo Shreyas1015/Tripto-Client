@@ -137,7 +137,7 @@
 //     </div>
 //   );
 // }
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Car } from "lucide-react";
@@ -154,8 +154,11 @@ export default function CarTypeSelection() {
   // Receive both one-way and round-trip data from location state
   const { fourSeater, sixSeater, oneWayTrip, roundTrip, distance } =
     location.state || {};
+  console.log("oneWayTrip: ", oneWayTrip);
+  console.log("roundTrip: ", roundTrip);
+  console.log("distance: ", distance);
 
-  const [selectedCar, setSelectedCar] = React.useState("");
+  const [selectedCar, setSelectedCar] = useState("");
 
   const carOptions = [
     { type: "4 + 1", fare: fourSeater },
