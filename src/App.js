@@ -19,6 +19,9 @@ import Loading from "./My_Components/Loading";
 import toast from "react-hot-toast";
 import BusinessStatsPage from "./Pages/Admin/BusinessStatsPage";
 import AdminDriverVerificationPage from "./Pages/Admin/AdminDriverVerificationPage";
+import VendorDashboard from "./Pages/Vendors/VendorsDashboard";
+import VendorsProfilePage from "./Pages/Vendors/VendorsProfilePage";
+import VendorsTripBookingPage from "./Pages/Vendors/VendorsTripBookingPage";
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -105,8 +108,9 @@ const App = () => {
           </>
           {/* Vendor Routes */}
           <>
-            <Route path="/vendorsdashboard" element={<DriversDashboard />} />
-            {/* helloooo */}
+            <Route path="/vendordashboard" element={<VendorDashboard />} />
+            <Route path="/vendorprofile" element={<VendorsProfilePage />} />
+            <Route path="/vendortrip" element={<VendorsTripBookingPage />} />
           </>
         </Routes>
       </Router>

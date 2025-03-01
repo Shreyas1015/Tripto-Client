@@ -398,13 +398,14 @@ import {
   MapPin,
   Calendar,
   Clock,
-  Car,
   DollarSign,
-  ArrowRight,
-  Scale,
+  Currency,
+  CurrencyIcon,
+  IndianRupee,
 } from "lucide-react";
 import secureLocalStorage from "react-secure-storage";
 import axiosInstance from "../../API/axiosInstance";
+import axios from "axios";
 
 export default function EnhancedPassengerDashboard() {
   const navigate = useNavigate();
@@ -414,7 +415,6 @@ export default function EnhancedPassengerDashboard() {
   const [selectedTripIndex, setSelectedTripIndex] = useState(null);
   const uid = localStorage.getItem("@secure.n.uid");
   const decryptedUID = secureLocalStorage.getItem("uid");
-
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -422,7 +422,26 @@ export default function EnhancedPassengerDashboard() {
           `${process.env.REACT_APP_BASE_URL}/passengers/fetchBookingsDataTable`,
           { decryptedUID }
         );
-        setBookings(res.data);
+
+        const trips = res.data;
+
+        // Process bookings and fetch addresses only if needed
+        const updatedTrips = await Promise.all(
+          trips.map(async (trip) => {
+            const pickupAddress = await getReadableAddress(
+              trip.pickup_location
+            );
+            const dropAddress = await getReadableAddress(trip.drop_location);
+
+            return {
+              ...trip,
+              pickup_location: pickupAddress,
+              drop_location: dropAddress,
+            };
+          })
+        );
+
+        setBookings(updatedTrips);
       } catch (error) {
         console.error("Bookings Data Fetch Error: ", error.message);
       }
@@ -430,6 +449,63 @@ export default function EnhancedPassengerDashboard() {
 
     fetchBookings();
   }, [decryptedUID]);
+
+  // Function to check if a location is in lat,lng format
+  const isLatLngFormat = (location) => {
+    return /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(location);
+  };
+
+  // Function to fetch an address if it's in lat,lng format
+  const getReadableAddress = async (location) => {
+    if (!location) return "Unknown Location";
+
+    if (isLatLngFormat(location)) {
+      const [lat, lng] = location.split(",").map((val) => val.trim());
+      return await reverseGeocode(lat, lng);
+    }
+
+    return location; // If it's already a proper address, return as is
+  };
+
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      if (!lat || !lng) {
+        return "Unknown Location";
+      }
+
+      const apiKey = process.env.REACT_APP_OLA_API_KEY;
+      if (!apiKey) {
+        console.error("❌ Ola Maps API Key is missing in .env file!");
+        return "Unknown Location";
+      }
+
+      // Construct the API URL
+      const reverseGeocodeUrl = `https://api.olamaps.io/places/v1/reverse-geocode?latlng=${lat},${lng}&api_key=${apiKey}`;
+
+      // Make the request
+      const response = await axios.get(reverseGeocodeUrl, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      // Check if response contains valid data
+      if (
+        !response.data ||
+        !response.data.results ||
+        response.data.results.length === 0
+      ) {
+        console.error("⚠️ No valid reverse geocoding results found.");
+        return "Unknown Location";
+      }
+
+      return response.data.results[0].formatted_address;
+    } catch (error) {
+      console.error(
+        "❌ Reverse Geocoding Error:",
+        error.response?.data || error.message
+      );
+      return "Unknown Location";
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setProgress(100), 3000);
@@ -714,7 +790,7 @@ export default function EnhancedPassengerDashboard() {
                     className="bg-white p-6 rounded-lg shadow-lg"
                   >
                     <h2 className="text-2xl font-bold mb-4 flex items-center space-x-2">
-                      <DollarSign className="h-6 w-6 text-[#0bbfe0]" />
+                      <IndianRupee className="h-6 w-6 text-[#0bbfe0]" />
                       <span>Payment Details</span>
                     </h2>
                     <div className="grid grid-cols-2 gap-6">
@@ -724,7 +800,7 @@ export default function EnhancedPassengerDashboard() {
                         </label>
                         <input
                           className="border border-gray-300 rounded p-2 w-full"
-                          value={`$${selectedTrip.price}`}
+                          value={`Rs. ${selectedTrip.price}`}
                           readOnly
                         />
                       </div>
