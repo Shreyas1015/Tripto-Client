@@ -1,11 +1,13 @@
 import React from "react";
-import VendorsSidebar from "../../My_Components/Vendors/VendorsSidebar";
 import VendorProfileContent from "../../My_Components/Vendors/VendorProfileContent";
+import VendorLayout from "../../My_Components/Vendors/VendorsSidebar";
 
 const VendorsProfilePage = () => {
   return (
     <div>
-      <VendorsSidebar contentComponent={<VendorProfileContent />} />
+      <VendorLayout>
+        <VendorProfileContent />
+      </VendorLayout>
     </div>
   );
 };

@@ -1,11 +1,13 @@
 import React from "react";
-import VendorsSidebar from "../../My_Components/Vendors/VendorsSidebar";
 import VendorTripBookingContent from "../../My_Components/Vendors/VendorTripBookingContent";
+import VendorLayout from "../../My_Components/Vendors/VendorsSidebar";
 
 const VendorsTripBookingPage = () => {
   return (
     <div>
-      <VendorsSidebar contentComponent={<VendorTripBookingContent />} />
+      <VendorLayout>
+        <VendorTripBookingContent />
+      </VendorLayout>
     </div>
   );
 };
