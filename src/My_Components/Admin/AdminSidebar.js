@@ -21,7 +21,7 @@ const menuItems = [
     label: "Passenger Details",
     href: "/admin-passenger-details",
     subItems: [
-      { label: "Edit Passengers", href: "/admin-edit-passenger" },
+      { label: "Edit Passengers", href: "/admin-passenger-details" },
       { label: "Trip History", href: "/admin-passenger-trip-history" },
     ],
   },

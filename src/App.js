@@ -22,6 +22,7 @@ import AdminDriverVerificationPage from "./Pages/Admin/AdminDriverVerificationPa
 import VendorDashboard from "./Pages/Vendors/VendorsDashboard";
 import VendorsProfilePage from "./Pages/Vendors/VendorsProfilePage";
 import VendorsTripBookingPage from "./Pages/Vendors/VendorsTripBookingPage";
+import AdminPassengerDetailsPage from "./Pages/Admin/AdminPassengerDetailsPage";
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -104,6 +105,10 @@ const App = () => {
             <Route
               path="/admin-driver-verification"
               element={<AdminDriverVerificationPage />}
+            />
+            <Route
+              path="/admin-passenger-details"
+              element={<AdminPassengerDetailsPage />}
             />
           </>
           {/* Vendor Routes */}

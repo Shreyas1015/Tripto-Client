@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bree+Serif&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -49,6 +50,59 @@
   }
 }
 
+/* Additional styles for the 3D loader */
+.perspective-effect {
+  transform: perspective(1000px) rotateX(60deg);
+  transform-style: preserve-3d;
+}
+
+/* Keyframes for the car movement */
+@keyframes drive {
+  0% {
+    transform: translateX(-50px);
+  }
+  100% {
+    transform: translateX(50px);
+  }
+}
+
+/* Keyframes for the wheel rotation */
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pulse animation for the loader */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Bounce animation */
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* For dark mode transitions */
+.dark {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -58,7 +112,6 @@
   }
 }
 
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bree+Serif&display=swap");
 * {
   margin: 0;
   padding: 0;
