@@ -139,7 +139,6 @@ const DriversHomeContent = () => {
   const navigate = useNavigate();
   const uid = localStorage.getItem("@secure.n.uid");
   const decryptedUID = secureLocalStorage.getItem("uid");
-
   const [bookingsData, setBookingsData] = useState([]);
 
   useEffect(() => {
@@ -151,17 +150,16 @@ const DriversHomeContent = () => {
         );
         if (res.status === 200) {
           setBookingsData(res.data);
-          console.log(res.data);
-        } else {
-          toast.error("Error Fetching Bookings Details!");
+          console.log("Bookings Data : ", res.data);
         }
       } catch (error) {
+        toast.error("Error Fetching Bookings Details!");
         console.log(error);
       }
     };
 
     fetchBookingsDetails();
-    const intervalId = setInterval(fetchBookingsDetails, 5000); // Poll every 5 seconds
+    const intervalId = setInterval(fetchBookingsDetails, 15000); // Poll every 5 seconds
 
     return () => clearInterval(intervalId);
   }, [decryptedUID]);
@@ -189,7 +187,17 @@ const DriversHomeContent = () => {
         // Optionally, update the state by removing the accepted booking
         const updatedBookings = bookingsData.filter((item) => item.bid !== bid);
         setBookingsData(updatedBookings);
-        navigate(`/driversdashboard?uid=${uid}`);
+
+        // Only redirect to driver-navigation for one-way trips
+        if (booking.trip_type === 1) {
+          // For one-way trips (immediate travel), redirect to driver-navigation
+          navigate(`/driver-navigation?uid=${uid}`, {
+            state: { rideDetails: booking },
+          });
+        } else {
+          // For round trips (scheduled for future), just go to dashboard
+          navigate(`/driversdashboard?uid=${uid}`);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -236,71 +244,7 @@ const DriversHomeContent = () => {
         <h1 className="text-3xl font-bold text-[#077286] mb-8">
           Available Bookings
         </h1>
-        {/* <div className="grid grid-cols-1 gap-6">
-          {bookingsData.map((booking) => (
-            <motion.div
-              key={booking.bid}
-              className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-            >
-              <h5 className="text-lg font-semibold">
-                {booking.trip_type === 1 ? "One Way Trip" : "Round Trip"}
-              </h5>
-              <div className="flex items-center my-2">
-                <MapPin className="w-5 h-5 mr-2 text-gray-500" />
-                <p className="text-gray-700">
-                  Pickup: {booking.pickup_location}
-                </p>
-              </div>
-              <div className="flex items-center my-2">
-                <MapPin className="w-5 h-5 mr-2 text-gray-500" />
-                <p className="text-gray-700">Drop: {booking.drop_location}</p>
-              </div>
-              <div className="flex items-center my-2">
-                <Calendar className="w-5 h-5 mr-2 text-gray-500" />
-                <p className="text-gray-700">
-                  Date & Time:{" "}
-                  {new Date(booking.pickup_date_time).toLocaleString("en-GB", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "numeric",
-                    hour12: true,
-                  })}
-                </p>
-              </div>
-              <div className="flex items-center my-2">
-                <Car className="w-5 h-5 mr-2 text-gray-500" />
-                <p className="text-gray-700">
-                  Car Type:{" "}
-                  {booking.car_type === 1
-                    ? "( 4 + 1 SEDAN )"
-                    : "( 6 + 1 SUV , MUV )"}
-                </p>
-              </div>
-              <div className="flex items-center my-2">
-                <span className="font-semibold">Money: </span>
-                <p className="text-gray-700">₹{booking.price}</p>
-              </div>
-              <div className="flex items-center my-2">
-                <span className="font-semibold">Distance: </span>
-                <p className="text-gray-700">{booking.distance} KM</p>
-              </div>
 
-              <div className="mt-4">
-                <button
-                  onClick={(e) => handleSubmit(booking.bid, e)}
-                  className="btn blue-buttons"
-                >
-                  Accept Booking
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div> */}
         {bookingsData.length > 0 ? (
           bookingsData.map((booking) => {
             const { formattedDate, formattedTime } = formatDateTime(
@@ -309,9 +253,16 @@ const DriversHomeContent = () => {
 
             return (
               <div
-                className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg mb-8"
+                className="relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg mb-8"
                 key={booking.id}
               >
+                {/* Vendor Booking Notch */}
+                {booking.vid && (
+                  <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                    Vendor Booking
+                  </div>
+                )}
+
                 <div className="p-8">
                   <div className="flex justify-between items-start mb-6">
                     <span
@@ -355,7 +306,7 @@ const DriversHomeContent = () => {
                     <div className="flex items-center">
                       <Car className="w-10 h-10 mr-3 text-[#0bbfe0]" />
                       <span className="text-xl font-semibold">
-                        {booking.selected_car === 1 ? "SEDAN " : "SUV , MUV"}
+                        {booking.selected_car === 1 ? "SEDAN" : "SUV, MUV"}
                       </span>
                     </div>
                     <div className="flex items-center">

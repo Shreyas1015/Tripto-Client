@@ -65,7 +65,7 @@ const Navbar = ({ handleTrigger }) => {
           }
         );
 
-        setUpdatedProfileIMG(response.data.link.profile_img);
+        setUpdatedProfileIMG(response.data.link.profilePhoto);
       } catch (error) {
         console.error("Error fetching profile image:", error.message);
       }
@@ -181,7 +181,7 @@ const Navbar = ({ handleTrigger }) => {
               {showProfileMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
                   <Link
-                    to={`/passengerprofile?uid=${uid}`}
+                    to={`/vendorprofile?uid=${uid}`}
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Your Profile

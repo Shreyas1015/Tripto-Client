@@ -1241,6 +1241,8 @@ import {
   Phone,
   Send,
   CheckSquare,
+  Building,
+  Loader,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -1261,13 +1263,13 @@ const VendorProfileContent = () => {
   const [udyamAadhar, setUdyamAadhar] = useState("");
   const [ghumastaLicense, setGhumastaLicense] = useState("");
   const [profilePhoto, setProfilePhoto] = useState("");
-  const [firmName, setFirmName] = useState("");
   const [profileData, setProfileData] = useState({
     uid: decryptedUID,
     name: "",
     email: "",
     emailOtp: "",
     phone_number: "",
+    firm_name: "",
   });
   const [statusIndicators, setStatusIndicators] = useState({});
   const [docsView, setDocsView] = useState({
@@ -1279,13 +1281,19 @@ const VendorProfileContent = () => {
     profilePhoto: "",
   });
   const [activeTab, setActiveTab] = useState("profile");
+  const [isEmailChanged, setIsEmailChanged] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   useEffect(() => {
     const fetchStatusIndicators = async () => {
       try {
         const response = await axiosInstance.post(
           `${process.env.REACT_APP_BASE_URL}/vendor/fetchParticularDocStatus`,
-          { decryptedUID }
+          {
+            decryptedUID,
+          }
         );
 
         if (response.status === 200) {
@@ -1307,6 +1315,8 @@ const VendorProfileContent = () => {
 
         if (response.status === 200) {
           setProfileData(response.data);
+          console.log("Profile data:", response.data);
+          setPreviousEmail(response.data.email || "");
         }
       } catch (error) {
         console.error("Error fetching profile data:", error.message);
@@ -1333,15 +1343,31 @@ const VendorProfileContent = () => {
     fetchDocLinks();
   }, [decryptedUID]);
 
+  // Check if email has been changed
+  useEffect(() => {
+    if (previousEmail && profileData.email !== previousEmail) {
+      setIsEmailChanged(true);
+    } else {
+      setIsEmailChanged(false);
+      setIsEmailVerified(false);
+    }
+  }, [profileData.email, previousEmail]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfileData({ ...profileData, [name]: value });
   };
 
   const handleEmailVerification = async () => {
+    if (!isEmailChanged) {
+      toast.error("Please change your email address first");
+      return;
+    }
+
+    setIsVerifying(true);
     try {
       const res = await axiosInstance.post(
-        ` ${process.env.REACT_APP_BASE_URL}/vendor/sendProfileUpdateEmailVerification`,
+        `${process.env.REACT_APP_BASE_URL}/vendor/sendProfileUpdateEmailVerification`,
         { decryptedUID }
       );
 
@@ -1354,10 +1380,18 @@ const VendorProfileContent = () => {
     } catch (error) {
       console.error(error);
       toast.error("An error occurred while sending email verification code");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
   const confirmEmailVerification = async () => {
+    if (!profileData.emailOtp) {
+      toast.error("Please enter the OTP");
+      return;
+    }
+
+    setIsVerifying(true);
     try {
       const res = await axiosInstance.post(
         `${process.env.REACT_APP_BASE_URL}/auth/confirmEmail`,
@@ -1369,17 +1403,21 @@ const VendorProfileContent = () => {
 
       if (res.data.success) {
         toast.success("Email verified successfully");
+        setIsEmailVerified(true);
       } else {
         toast.error("Failed to verify Email OTP");
       }
     } catch (error) {
       console.error(error);
       toast.error("Invalid OTP");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
   const handleDocumentSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const formData = {
@@ -1390,7 +1428,6 @@ const VendorProfileContent = () => {
         udyamAadhar: udyamAadhar,
         ghumastaLicense: ghumastaLicense,
         profilePhoto: profilePhoto,
-        firmName: firmName,
       };
 
       if (formData === null) throw Error;
@@ -1407,29 +1444,44 @@ const VendorProfileContent = () => {
         toast.success(
           "Documents Successfully Uploaded! Please wait for the admin to verify your documents."
         );
-        window.location.reload();
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }
     } catch (error) {
       toast.error("An error occurred while uploading your documents.");
       console.error("Error:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleProfileEdit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      const verifyEmailRes = await axiosInstance.post(
-        `${process.env.REACT_APP_BASE_URL}/auth/confirmEmail`,
-        {
-          email: previousEmail,
-          emailOtp: profileData.emailOtp,
+      // Only verify if OTP was entered
+      if (isEmailChanged && !isEmailVerified) {
+        if (!profileData.emailOtp) {
+          toast.error("Please verify your new email address with OTP");
+          setIsSubmitting(false);
+          return;
         }
-      );
 
-      if (!verifyEmailRes.data.success) {
-        toast.error("Email OTP verification failed");
-        return;
+        const verifyEmailRes = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/auth/confirmEmail`,
+          {
+            email: previousEmail,
+            emailOtp: profileData.emailOtp,
+          }
+        );
+
+        if (!verifyEmailRes.data.success) {
+          toast.error("Email OTP verification failed");
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       const res = await axiosInstance.post(
@@ -1441,16 +1493,20 @@ const VendorProfileContent = () => {
       );
 
       if (res.status === 200) {
-        if (profileData.email !== previousEmail) {
+        if (isEmailChanged) {
           toast.success(
             "Profile has been updated. Please login again with your updated email."
           );
-          window.localStorage.removeItem("token");
-          window.localStorage.removeItem("user_type");
-          navigate("/");
+          setTimeout(() => {
+            window.localStorage.removeItem("token");
+            window.localStorage.removeItem("user_type");
+            navigate("/");
+          }, 2000);
         } else {
           toast.success("Profile is Updated Successfully");
-          window.location.reload();
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         }
       } else {
         console.error("Error updating profile");
@@ -1459,13 +1515,15 @@ const VendorProfileContent = () => {
     } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred while updating your profile");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const authenticator = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/vendor/drivers_document_auth`
+        `${process.env.REACT_APP_BASE_URL}/vendor/vendor_document_auth`
       );
 
       if (!response.ok) {
@@ -1603,6 +1661,7 @@ const VendorProfileContent = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header with gradient background */}
       <div className="bg-gradient-to-r from-[#00B7C2] to-[#008999] rounded-2xl p-6 mb-8 text-white">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -1632,12 +1691,15 @@ const VendorProfileContent = () => {
               <h2 className="text-xl font-semibold">
                 {profileData.name || "Vendor"}
               </h2>
-              <p className="text-[#e6f7f8]">{firmName || "Your Business"}</p>
+              <p className="text-[#e6f7f8]">
+                {profileData.firm_name || "Your Business"}
+              </p>
             </div>
           </div>
         </motion.div>
       </div>
 
+      {/* Tabs Navigation */}
       <div className="mb-8">
         <div className="flex border-b border-gray-200">
           <button
@@ -1663,6 +1725,7 @@ const VendorProfileContent = () => {
         </div>
       </div>
 
+      {/* Profile Information Tab */}
       {activeTab === "profile" && (
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -1677,6 +1740,7 @@ const VendorProfileContent = () => {
           <form onSubmit={handleProfileEdit} className="space-y-6">
             <input type="hidden" name="uid" value={decryptedUID} />
 
+            {/* Name and Firm Name */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label
@@ -1690,7 +1754,7 @@ const VendorProfileContent = () => {
                   <input
                     name="name"
                     type="text"
-                    className="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#00B7C2] focus:border-[#00B7C2] outline-none transition-all"
+                    className="pl-10 pr-10 pt-3 pb-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00B7C2] focus:border-[#00B7C2] outline-none transition-all"
                     onChange={handleChange}
                     value={profileData.name || ""}
                     placeholder="Enter your full name"
@@ -1706,19 +1770,42 @@ const VendorProfileContent = () => {
                   Firm Name
                 </label>
                 <div className="relative">
-                  <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     name="firmName"
                     type="text"
-                    className="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#00B7C2] focus:border-[#00B7C2] outline-none transition-all"
-                    onChange={(e) => setFirmName(e.target.value)}
-                    value={firmName || ""}
+                    className="pl-10 pr-10 pt-3 pb-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00B7C2] focus:border-[#00B7C2] outline-none transition-all"
+                    onChange={handleChange}
+                    value={profileData.firm_name || ""}
                     placeholder="Enter your business name"
                   />
                 </div>
               </div>
             </div>
 
+            {/* Phone Number */}
+            <div className="space-y-2">
+              <label
+                htmlFor="phone_number"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone Number
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  name="phone_number"
+                  type="text"
+                  className="pl-10 pr-10 pt-3 pb-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00B7C2] focus:border-[#00B7C2] outline-none transition-all"
+                  required
+                  value={profileData.phone_number || ""}
+                  onChange={handleChange}
+                  placeholder="Enter your phone number"
+                />
+              </div>
+            </div>
+
+            {/* Email Address */}
             <div className="space-y-2">
               <label
                 htmlFor="email"
@@ -1732,90 +1819,116 @@ const VendorProfileContent = () => {
                   <input
                     name="email"
                     type="email"
-                    className="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#00B7C2] focus:border-[#00B7C2] outline-none transition-all"
+                    className={`pl-10 pr-10 pt-3 pb-3 w-full border rounded-lg focus:ring-2 outline-none transition-all ${
+                      isEmailChanged
+                        ? "border-amber-300 bg-amber-50 focus:ring-amber-300 focus:border-amber-300"
+                        : "border-gray-300 focus:ring-[#00B7C2] focus:border-[#00B7C2]"
+                    }`}
                     required
                     value={profileData.email || ""}
                     onChange={handleChange}
                     placeholder="Enter your email address"
                   />
                 </div>
-                <button
-                  type="button"
-                  onClick={handleEmailVerification}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#00B7C2] text-white rounded-lg hover:bg-[#008999] transition-colors font-medium"
-                >
-                  <Send className="w-4 h-4" />
-                  Send OTP
-                </button>
+                {isEmailChanged && (
+                  <button
+                    type="button"
+                    onClick={handleEmailVerification}
+                    disabled={isVerifying || isEmailVerified}
+                    className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg transition-colors font-medium ${
+                      isEmailVerified
+                        ? "bg-green-500 text-white hover:bg-green-600"
+                        : "bg-[#00B7C2] text-white hover:bg-[#008999]"
+                    } disabled:opacity-70 disabled:cursor-not-allowed`}
+                  >
+                    {isVerifying ? (
+                      <Loader className="w-4 h-4 animate-spin" />
+                    ) : isEmailVerified ? (
+                      <CheckCircle className="w-4 h-4" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                    {isEmailVerified ? "Verified" : "Send OTP"}
+                  </button>
+                )}
               </div>
+              {isEmailChanged && !isEmailVerified && (
+                <p className="text-amber-600 text-sm mt-1 flex items-center gap-1">
+                  <Info className="w-4 h-4" />
+                  Email changed. Verification required.
+                </p>
+              )}
             </div>
 
-            <div className="space-y-2">
-              <label
-                htmlFor="emailOtp"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email Verification Code
-              </label>
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="relative flex-grow">
-                  <CheckSquare className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    id="emailOtp"
-                    name="emailOtp"
-                    className="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#00B7C2] focus:border-[#00B7C2] outline-none transition-all"
-                    value={profileData.emailOtp || ""}
-                    placeholder="Enter verification code"
-                    onChange={handleChange}
-                    required
-                  />
+            {/* Email OTP Verification */}
+            {isEmailChanged && !isEmailVerified && (
+              <div className="space-y-2">
+                <label
+                  htmlFor="emailOtp"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email Verification Code
+                </label>
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="relative flex-grow">
+                    <CheckSquare className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      id="emailOtp"
+                      name="emailOtp"
+                      className="pl-10 pr-10 pt-3 pb-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00B7C2] focus:border-[#00B7C2] outline-none transition-all"
+                      value={profileData.emailOtp || ""}
+                      placeholder="Enter verification code"
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={confirmEmailVerification}
+                    disabled={isVerifying || !profileData.emailOtp}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#00B7C2] text-white rounded-lg hover:bg-[#008999] transition-colors font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {isVerifying ? (
+                      <Loader className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle className="w-4 h-4" />
+                    )}
+                    Verify OTP
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={confirmEmailVerification}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#00B7C2] text-white rounded-lg hover:bg-[#008999] transition-colors font-medium"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Verify OTP
-                </button>
               </div>
-            </div>
+            )}
 
-            <div className="space-y-2">
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  name="phone_number"
-                  type="text"
-                  className="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#00B7C2] focus:border-[#00B7C2] outline-none transition-all"
-                  required
-                  value={profileData.phone_number || ""}
-                  onChange={handleChange}
-                  placeholder="Enter your phone number"
-                />
-              </div>
-            </div>
-
+            {/* Submit Button */}
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#00B7C2] to-[#008999] text-white rounded-lg hover:from-[#00a6b0] hover:to-[#007a89] transition-all font-medium flex items-center justify-center gap-2"
+                disabled={isSubmitting || (isEmailChanged && !isEmailVerified)}
+                className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#00B7C2] to-[#008999] text-white rounded-lg hover:from-[#00a6b0] hover:to-[#007a89] transition-all font-medium flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <User className="w-5 h-5" />
-                Update Profile
+                {isSubmitting ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <User className="w-5 h-5" />
+                    Update Profile
+                  </>
+                )}
               </button>
+              {isEmailChanged && !isEmailVerified && (
+                <p className="text-amber-600 text-sm mt-2">
+                  Please verify your new email address before updating
+                </p>
+              )}
             </div>
           </form>
         </motion.div>
       )}
 
+      {/* Documents Tab */}
       {activeTab === "documents" && (
         <motion.div
           initial={{ opacity: 0, x: 20 }}
@@ -1830,6 +1943,7 @@ const VendorProfileContent = () => {
               Upload your documents for verification
             </p>
 
+            {/* Status Indicator */}
             <div className="flex items-center gap-3 mb-6">
               <div
                 className={`w-3 h-3 rounded-full ${
@@ -1846,6 +1960,7 @@ const VendorProfileContent = () => {
             </div>
 
             <form onSubmit={handleDocumentSubmit} className="space-y-4">
+              {/* Profile Photo Upload */}
               {statusIndicators.profilePhotoStatus !== 1 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -1884,6 +1999,7 @@ const VendorProfileContent = () => {
                           isPrivateFile={false}
                           onSuccess={(r) => {
                             setProfilePhoto(r.url);
+
                             toast.success(
                               "Profile photo uploaded successfully"
                             );
@@ -1908,6 +2024,7 @@ const VendorProfileContent = () => {
                 </motion.div>
               )}
 
+              {/* Document Uploads */}
               {renderDocumentUpload(
                 "Aadhar Card Front",
                 "aadharFront",
@@ -1953,6 +2070,7 @@ const VendorProfileContent = () => {
                 docsView.ghumastaLicense
               )}
 
+              {/* Submit Documents Button */}
               {statusIndicators.all_documents_status !== 1 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -1962,10 +2080,20 @@ const VendorProfileContent = () => {
                 >
                   <button
                     type="submit"
-                    className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#00B7C2] to-[#008999] text-white rounded-lg hover:from-[#00a6b0] hover:to-[#007a89] transition-all font-medium flex items-center justify-center gap-2"
+                    disabled={isSubmitting}
+                    className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#00B7C2] to-[#008999] text-white rounded-lg hover:from-[#00a6b0] hover:to-[#007a89] transition-all font-medium flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    <Upload className="w-5 h-5" />
-                    Submit Documents
+                    {isSubmitting ? (
+                      <>
+                        <Loader className="w-5 h-5 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-5 h-5" />
+                        Submit Documents
+                      </>
+                    )}
                   </button>
                 </motion.div>
               )}

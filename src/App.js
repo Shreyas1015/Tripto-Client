@@ -23,6 +23,15 @@ import VendorDashboard from "./Pages/Vendors/VendorsDashboard";
 import VendorsProfilePage from "./Pages/Vendors/VendorsProfilePage";
 import VendorsTripBookingPage from "./Pages/Vendors/VendorsTripBookingPage";
 import AdminPassengerDetailsPage from "./Pages/Admin/AdminPassengerDetailsPage";
+import VendorTripSelectionPage from "./Pages/Vendors/VendorTripSelectionPage";
+import VendorRoundTripPage from "./Pages/Vendors/VendorRoundTripPage";
+import VendorOneWayTripPage from "./Pages/Vendors/VendorOneWayTripPage";
+import VendorCarTypeSelectionPage from "./Pages/Vendors/VendorCarTypeSelectionPage";
+import PassengerWaitingForDriverPage from "./Pages/Passengers/PassengerWaitingForDriverPage";
+import PassengerRideDetailsPage from "./Pages/Passengers/PassengerRideDetailsPage";
+import PassengerRateDriverPage from "./Pages/Passengers/PassengerRateDriverPage";
+import PassengerRoundTripConfirmationPage from "./Pages/Passengers/PassengerRoundTripConfirmationPage";
+import DriverNavigatonPage from "./Pages/Drivers/DriverNavigatonPage";
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -85,6 +94,19 @@ const App = () => {
               path="/car-type-selection"
               element={<PassengerCarTpeSelectionPage />}
             />
+            <Route
+              path="/waiting-for-driver"
+              element={<PassengerWaitingForDriverPage />}
+            />
+            <Route
+              path="/ride-details"
+              element={<PassengerRideDetailsPage />}
+            />
+            <Route path="/rate-driver" element={<PassengerRateDriverPage />} />
+            <Route
+              path="/round-trip-confirmation"
+              element={<PassengerRoundTripConfirmationPage />}
+            />
           </>
           {/* Driver Routes */}
           <>
@@ -95,6 +117,10 @@ const App = () => {
             <Route path="/drivershomepage" element={<DriversHomePage />} />
             <Route path="/driversdashboard" element={<DriversDashboard />} />
             <Route path="/booking-details" element={<BookingDetailsPage />} />
+            <Route
+              path="/driver-navigation"
+              element={<DriverNavigatonPage />}
+            />
           </>
           {/* Admin Routes */}
           <>
@@ -115,7 +141,19 @@ const App = () => {
           <>
             <Route path="/vendordashboard" element={<VendorDashboard />} />
             <Route path="/vendorprofile" element={<VendorsProfilePage />} />
-            <Route path="/vendortrip" element={<VendorsTripBookingPage />} />
+            <Route path="/vendortrip" element={<VendorTripSelectionPage />} />
+            <Route
+              path="/vendor/round-trip"
+              element={<VendorRoundTripPage />}
+            />
+            <Route
+              path="/vendor/one-way-trip"
+              element={<VendorOneWayTripPage />}
+            />
+            <Route
+              path="/vendor/car-type-selection"
+              element={<VendorCarTypeSelectionPage />}
+            />
           </>
         </Routes>
       </Router>
