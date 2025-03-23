@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -6,9 +8,10 @@ import {
   Phone,
   MessageSquare,
   Navigation,
-  Clock,
   CheckCircle,
   X,
+  Key,
+  Clock,
 } from "lucide-react";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
@@ -19,16 +22,13 @@ export default function DriverNavigation() {
   const navigate = useNavigate();
   const uid = localStorage.getItem("@secure.n.uid");
   const decryptedUID = secureLocalStorage.getItem("uid");
-  const mapRef = useRef(null);
   const [rideDetails, setRideDetails] = useState(null);
-  const [currentLocation, setCurrentLocation] = useState(null);
-  const [eta, setEta] = useState(null);
-  const [otpInput, setOtpInput] = useState("");
-  const [rideStatus, setRideStatus] = useState("accepted"); // accepted, arrived, inProgress, completed
-  const [mapInstance, setMapInstance] = useState(null);
-  const [driverMarker, setDriverMarker] = useState(null);
-  const [routeLine, setRouteLine] = useState(null);
-  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [rideStartOtpInput, setRideStartOtpInput] = useState("");
+  const [rideStatus, setRideStatus] = useState("accepted"); // accepted, arrived, started, inProgress, completed
+  const [showRideStartOtpModal, setShowRideStartOtpModal] = useState(false);
+  const [paymentOtp, setPaymentOtp] = useState(null);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [isGeneratingPaymentOtp, setIsGeneratingPaymentOtp] = useState(false);
 
   // Get ride details from location state or fetch from API
   useEffect(() => {
@@ -39,6 +39,7 @@ export default function DriverNavigation() {
           // Only proceed if it's a one-way trip
           if (location.state.rideDetails.trip_type === 1) {
             setRideDetails(location.state.rideDetails);
+            console.log("Ride details from state:", location.state.rideDetails);
           } else {
             toast.info("Navigation is only available for one-way trips");
             navigate(`/drivershome?uid=${uid}`);
@@ -75,280 +76,134 @@ export default function DriverNavigation() {
     fetchRideDetails();
   }, [location.state, decryptedUID, navigate, uid]);
 
-  // Initialize map once we have ride details
+  // Poll for trip status updates
   useEffect(() => {
-    if (!rideDetails || !window.OlaMapsSDK) return;
+    if (!rideDetails?.bookingId && !rideDetails?.bid) return;
 
-    const initMap = async () => {
+    const fetchTripStatus = async () => {
       try {
-        const olaMaps = new window.OlaMapsSDK.OlaMaps({
-          apiKey: process.env.REACT_APP_OLA_API_KEY,
-        });
+        const res = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/drivers/getTripStatus`,
+          {
+            decryptedUID,
+            bookingId: rideDetails.bookingId || rideDetails.bid,
+          }
+        );
 
-        // Parse pickup and drop coordinates
-        const pickupCoords = parseCoordinates(rideDetails.pickup_location);
-        const dropCoords = parseCoordinates(rideDetails.drop_location);
+        if (res.status === 200) {
+          const tripStatus = res.data;
+          console.log("Trip status:", tripStatus);
 
-        if (!pickupCoords || !dropCoords) {
-          console.error("Invalid coordinates");
-          return;
+          if (tripStatus === 1) {
+            setRideStatus("accepted");
+          } else if (tripStatus === 2) {
+            setRideStatus("arrived");
+          } else if (tripStatus === 3) {
+            setRideStatus("started");
+          } else if (tripStatus === 4) {
+            setRideStatus("inProgress");
+          } else if (tripStatus === 5) {
+            setRideStatus("completed");
+          }
         }
-
-        // Get current location (in a real app, use browser geolocation)
-        // For demo, we'll place the driver at a random position near pickup
-        const initialDriverLng =
-          pickupCoords.lng + (Math.random() - 0.5) * 0.01;
-        const initialDriverLat =
-          pickupCoords.lat + (Math.random() - 0.5) * 0.01;
-        setCurrentLocation({ lat: initialDriverLat, lng: initialDriverLng });
-
-        // Initialize map centered on driver's location
-        const map = olaMaps.init({
-          style:
-            "https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json",
-          container: "driver-map",
-          center: [initialDriverLng, initialDriverLat],
-          zoom: 15,
-        });
-
-        setMapInstance(map);
-
-        // Add pickup marker (blue)
-        olaMaps
-          .addMarker({
-            offset: [0, 6],
-            anchor: "bottom",
-            color: "blue",
-          })
-          .setLngLat([pickupCoords.lng, pickupCoords.lat])
-          .addTo(map);
-
-        // Add destination marker (red)
-        olaMaps
-          .addMarker({
-            offset: [0, 6],
-            anchor: "bottom",
-            color: "red",
-          })
-          .setLngLat([dropCoords.lng, dropCoords.lat])
-          .addTo(map);
-
-        // Add driver marker (green)
-        const driverMarkerInstance = olaMaps
-          .addMarker({
-            offset: [0, 6],
-            anchor: "bottom",
-            color: "green",
-          })
-          .setLngLat([initialDriverLng, initialDriverLat])
-          .addTo(map);
-
-        setDriverMarker(driverMarkerInstance);
-
-        // Draw route from driver to pickup
-        drawRoute(
-          olaMaps,
-          map,
-          { lat: initialDriverLat, lng: initialDriverLng },
-          pickupCoords
-        );
-
-        // Calculate initial ETA
-        calculateEta(
-          { lat: initialDriverLat, lng: initialDriverLng },
-          pickupCoords
-        );
-
-        // Simulate driver movement (in a real app, this would be real GPS updates)
-        startDriverSimulation(
-          { lat: initialDriverLat, lng: initialDriverLng },
-          pickupCoords,
-          driverMarkerInstance,
-          olaMaps,
-          map
-        );
       } catch (error) {
-        console.error("Error initializing map:", error);
+        console.error("Error fetching trip status:", error);
       }
     };
 
-    initMap();
-  }, [rideDetails]);
+    // Initial fetch
+    fetchTripStatus();
 
-  // Helper function to parse coordinates from string
-  const parseCoordinates = (coordString) => {
+    // Set up polling every 10 seconds
+    const intervalId = setInterval(fetchTripStatus, 10000);
+
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId);
+  }, [rideDetails, decryptedUID]);
+
+  // Handle OTP verification for ride start
+  const handleRideStartOtpVerification = async () => {
+    if (isVerifyingOtp) return;
+
+    setIsVerifyingOtp(true);
     try {
-      // Check if the string is in "lat, lng" format
-      const isLatLng =
-        /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(\d{1,3}(\.\d+)?|\d(\.\d+)?)/.test(
-          coordString
-        );
-
-      if (isLatLng) {
-        const [lat, lng] = coordString
-          .split(",")
-          .map((coord) => Number.parseFloat(coord.trim()));
-        return { lat, lng };
-      }
-
-      // If not in lat,lng format, return null (would need geocoding in a real app)
-      return null;
-    } catch (error) {
-      console.error("Error parsing coordinates:", error);
-      return null;
-    }
-  };
-
-  // Draw route between two points
-  const drawRoute = async (olaMaps, map, start, end) => {
-    try {
-      // Clear previous route if exists
-      if (routeLine) {
-        routeLine.remove();
-      }
-
-      // Get directions from Ola Maps API
-      const response = await axiosInstance.get(
-        `https://api.olamaps.io/routing/v1/directions?origin=${start.lat},${start.lng}&destination=${end.lat},${end.lng}&api_key=${process.env.REACT_APP_OLA_API_KEY}`
-      );
-
-      if (
-        response.data &&
-        response.data.routes &&
-        response.data.routes.length > 0
-      ) {
-        const route = response.data.routes[0];
-
-        // Create a GeoJSON object from the route geometry
-        const routeGeoJSON = {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "LineString",
-            coordinates: route.geometry.coordinates,
-          },
-        };
-
-        // Add the route to the map
-        const routeLineInstance = olaMaps
-          .addLine({
-            data: routeGeoJSON,
-            paint: {
-              "line-color": "#0bbfe0",
-              "line-width": 4,
-              "line-opacity": 0.8,
-            },
-          })
-          .addTo(map);
-
-        setRouteLine(routeLineInstance);
-      }
-    } catch (error) {
-      console.error("Error drawing route:", error);
-    }
-  };
-
-  // Calculate ETA between two points
-  const calculateEta = async (start, end) => {
-    try {
-      const response = await axiosInstance.get(
-        `https://api.olamaps.io/routing/v1/distanceMatrix?origins=${start.lat},${start.lng}&destinations=${end.lat},${end.lng}&api_key=${process.env.REACT_APP_OLA_API_KEY}`
-      );
-
-      if (
-        response.data &&
-        response.data.rows &&
-        response.data.rows.length > 0
-      ) {
-        const element = response.data.rows[0].elements[0];
-        if (element && element.duration) {
-          // Convert duration from seconds to minutes
-          const etaMinutes = Math.ceil(element.duration / 60);
-          setEta(etaMinutes);
-        }
-      }
-    } catch (error) {
-      console.error("Error calculating ETA:", error);
-    }
-  };
-
-  // Simulate driver movement (in a real app, this would be real GPS updates)
-  const startDriverSimulation = (start, destination, marker, olaMaps, map) => {
-    const simulationSteps = 20; // Number of steps to simulate
-    let currentStep = 0;
-
-    const latStep = (destination.lat - start.lat) / simulationSteps;
-    const lngStep = (destination.lng - start.lng) / simulationSteps;
-
-    const interval = setInterval(() => {
-      currentStep++;
-
-      if (currentStep >= simulationSteps) {
-        clearInterval(interval);
-        setRideStatus("arrived");
-        toast.success("You have arrived at the pickup location!");
-        return;
-      }
-
-      const newLat = start.lat + latStep * currentStep;
-      const newLng = start.lng + lngStep * currentStep;
-
-      // Update driver marker position
-      marker.setLngLat([newLng, newLat]);
-
-      // Update current location state
-      const newLocation = { lat: newLat, lng: newLng };
-      setCurrentLocation(newLocation);
-
-      // Recalculate ETA
-      calculateEta(newLocation, destination);
-
-      // Redraw route
-      drawRoute(olaMaps, map, newLocation, destination);
-    }, 3000); // Update every 3 seconds
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
-  };
-
-  // Handle OTP verification
-  const handleOtpVerification = async () => {
-    try {
-      // In a real app, this would be verified on the backend
+      // Verify OTP via backend
       const res = await axiosInstance.post(
-        `${process.env.REACT_APP_BASE_URL}/drivers/verifyOtp`,
+        `${process.env.REACT_APP_BASE_URL}/drivers/verifyRideStartOtp`,
         {
           decryptedUID,
-          rideId: rideDetails.id,
-          otp: otpInput,
+          rideId: rideDetails.bookingId || rideDetails.bid,
+          enteredOtp: Number.parseInt(rideStartOtpInput),
         }
       );
 
       if (res.status === 200) {
-        setRideStatus("inProgress");
-        setShowOtpModal(false);
-        toast.success("OTP verified! Ride started.");
-
-        // If we have map and driver marker, update the route to destination
-        if (mapInstance && driverMarker && currentLocation) {
-          const dropCoords = parseCoordinates(rideDetails.drop_location);
-
-          // Draw new route from current location to drop-off
-          const olaMaps = new window.OlaMapsSDK.OlaMaps({
-            apiKey: process.env.REACT_APP_OLA_API_KEY,
-          });
-
-          drawRoute(olaMaps, mapInstance, currentLocation, dropCoords);
-
-          // Calculate new ETA to destination
-          calculateEta(currentLocation, dropCoords);
-        }
+        setShowRideStartOtpModal(false);
+        toast.success("OTP verified successfully!");
+        // Don't call startRide here, let the user click the Start Ride button
       } else {
         toast.error("Invalid OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
       toast.error("Error verifying OTP");
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  // Handle start ride
+  const handleStartRide = async () => {
+    try {
+      const res = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/drivers/startRide`,
+        {
+          decryptedUID,
+          rideId: rideDetails.bookingId || rideDetails.bid,
+        }
+      );
+
+      if (res.status === 200) {
+        setRideStatus("started");
+        toast.success("Ride started successfully!");
+      } else {
+        toast.error("Failed to start ride. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error starting ride:", error);
+      toast.error("Error starting ride");
+    }
+  };
+
+  // Generate payment OTP
+  const handleGeneratePaymentOtp = async () => {
+    if (isGeneratingPaymentOtp) return;
+
+    setIsGeneratingPaymentOtp(true);
+    try {
+      // Generate a random 4-digit OTP
+      const generatedOtp = Math.floor(1000 + Math.random() * 9000);
+      setPaymentOtp(generatedOtp);
+
+      // Save OTP to backend
+      await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/drivers/setPaymentOtp`,
+        {
+          decryptedUID,
+          rideId: rideDetails.bookingId || rideDetails.bid,
+          otp: generatedOtp,
+        }
+      );
+
+      toast.success(
+        "Payment OTP generated. Share with passenger to complete payment."
+      );
+      console.log("Payment OTP generated:", generatedOtp);
+    } catch (error) {
+      console.error("Error generating payment OTP:", error);
+      toast.error("Error generating payment OTP");
+    } finally {
+      setIsGeneratingPaymentOtp(false);
     }
   };
 
@@ -366,30 +221,19 @@ export default function DriverNavigation() {
     toast.success("Chat feature will be implemented soon!");
   };
 
-  // Handle ride completion
-  const handleCompleteRide = async () => {
+  // Handle arrived at pickup
+  const handleArrivedAtPickup = async () => {
     try {
       await axiosInstance.post(
-        `${process.env.REACT_APP_BASE_URL}/drivers/completeRide`,
+        `${process.env.REACT_APP_BASE_URL}/drivers/arrivedAtPickup`,
         {
           decryptedUID,
-          rideId: rideDetails.id,
+          rideId: rideDetails.bookingId || rideDetails.bid,
         }
       );
 
-      setRideStatus("completed");
-      toast.success("Ride completed successfully!");
-    } catch (error) {
-      console.error("Error completing ride:", error);
-      toast.error("Error completing ride");
-    }
-  };
-
-  // Handle arrived at pickup
-  const handleArrivedAtPickup = () => {
-    try {
       setRideStatus("arrived");
-      setShowOtpModal(true);
+      setShowRideStartOtpModal(true);
       toast.success("Marked as arrived at pickup location");
     } catch (error) {
       console.error("Error updating arrival status:", error);
@@ -411,34 +255,28 @@ export default function DriverNavigation() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e6f7fb] to-[#e0f2f7]">
       <div className="max-w-4xl mx-auto p-4">
-        {/* Map Section */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-          <div
-            id="driver-map"
-            ref={mapRef}
-            className="w-full h-64 md:h-96"
-          ></div>
-        </div>
-
         {/* Ride Status */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-[#077286]">
               {rideStatus === "accepted" && "Navigate to Pickup"}
               {rideStatus === "arrived" && "Waiting for Passenger"}
+              {rideStatus === "started" && "Ride Started"}
               {rideStatus === "inProgress" && "Navigate to Destination"}
               {rideStatus === "completed" && "Ride Completed"}
             </h2>
-            {eta && rideStatus !== "completed" && (
-              <div className="flex items-center bg-[#e0f2f7] px-4 py-2 rounded-full">
-                <Clock className="w-5 h-5 mr-2 text-[#0bbfe0]" />
-                <span className="font-semibold">
-                  {rideStatus === "inProgress"
-                    ? `${eta} min to destination`
-                    : `${eta} min to pickup`}
-                </span>
-              </div>
-            )}
+            <div className="flex items-center bg-[#e0f2f7] px-4 py-2 rounded-full">
+              <Clock className="w-5 h-5 mr-2 text-[#0bbfe0]" />
+              <span className="font-semibold">
+                {rideStatus === "accepted"
+                  ? "En route to pickup"
+                  : rideStatus === "arrived"
+                  ? "At pickup location"
+                  : rideStatus === "started" || rideStatus === "inProgress"
+                  ? "On the way to destination"
+                  : "Trip completed"}
+              </span>
+            </div>
           </div>
 
           {/* Passenger Info */}
@@ -517,6 +355,63 @@ export default function DriverNavigation() {
             </div>
           </div>
 
+          {/* Payment OTP Generation (shown only when ride is in progress) */}
+          {rideStatus === "inProgress" && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 border border-[#0bbfe0] rounded-lg mb-6"
+            >
+              <h3 className="text-lg font-semibold mb-2">
+                Generate Payment OTP
+              </h3>
+              <div className="flex items-center justify-between">
+                {paymentOtp ? (
+                  <div className="text-3xl font-bold tracking-wider text-[#077286]">
+                    {paymentOtp}
+                  </div>
+                ) : (
+                  <div className="text-gray-500">
+                    Click the button to generate payment OTP
+                  </div>
+                )}
+                <button
+                  onClick={handleGeneratePaymentOtp}
+                  disabled={isGeneratingPaymentOtp || paymentOtp !== null}
+                  className={`${
+                    paymentOtp !== null
+                      ? "bg-green-500 hover:bg-green-600"
+                      : isGeneratingPaymentOtp
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-[#0bbfe0] hover:bg-[#0999b3]"
+                  } text-white px-4 py-2 rounded-md flex items-center`}
+                >
+                  {isGeneratingPaymentOtp ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Generating...
+                    </>
+                  ) : paymentOtp !== null ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Generated
+                    </>
+                  ) : (
+                    <>
+                      <Key className="w-4 h-4 mr-2" />
+                      Generate OTP
+                    </>
+                  )}
+                </button>
+              </div>
+              {paymentOtp && (
+                <p className="mt-2 text-sm text-gray-600">
+                  Share this OTP with your passenger to complete the payment
+                </p>
+              )}
+            </motion.div>
+          )}
+
           {/* Action Buttons */}
           {rideStatus === "accepted" && (
             <button
@@ -528,20 +423,31 @@ export default function DriverNavigation() {
             </button>
           )}
 
-          {rideStatus === "inProgress" && (
+          {rideStatus === "started" && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg mb-6">
+              <div className="flex items-center">
+                <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                <p className="text-green-700 font-medium">
+                  Ride has started! Navigate to the destination.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {rideStatus === "arrived" && (
             <button
-              onClick={handleCompleteRide}
-              className="w-full bg-[#0bbfe0] hover:bg-[#0999b3] text-white py-3 rounded-md font-semibold flex items-center justify-center"
+              onClick={handleStartRide}
+              className="w-full bg-[#0bbfe0] hover:bg-[#0999b3] text-white py-3 rounded-md font-semibold flex items-center justify-center mt-4"
             >
               <CheckCircle className="w-5 h-5 mr-2" />
-              Complete Ride
+              Start Ride
             </button>
           )}
         </div>
       </div>
 
-      {/* OTP Modal */}
-      {showOtpModal && (
+      {/* OTP Modal for Ride Start */}
+      {showRideStartOtpModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -553,7 +459,7 @@ export default function DriverNavigation() {
                 Enter OTP from Passenger
               </h3>
               <button
-                onClick={() => setShowOtpModal(false)}
+                onClick={() => setShowRideStartOtpModal(false)}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="w-5 h-5" />
@@ -568,9 +474,11 @@ export default function DriverNavigation() {
             <div className="mb-4">
               <input
                 type="text"
-                value={otpInput}
+                value={rideStartOtpInput}
                 onChange={(e) =>
-                  setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 4))
+                  setRideStartOtpInput(
+                    e.target.value.replace(/\D/g, "").slice(0, 4)
+                  )
                 }
                 placeholder="Enter 4-digit OTP"
                 className="w-full border rounded-md p-3 text-center text-2xl tracking-widest"
@@ -580,21 +488,28 @@ export default function DriverNavigation() {
 
             <div className="flex space-x-3">
               <button
-                onClick={() => setShowOtpModal(false)}
+                onClick={() => setShowRideStartOtpModal(false)}
                 className="flex-1 py-2 border border-gray-300 rounded-md"
               >
                 Cancel
               </button>
               <button
-                onClick={handleOtpVerification}
-                disabled={otpInput.length !== 4}
+                onClick={handleRideStartOtpVerification}
+                disabled={rideStartOtpInput.length !== 4 || isVerifyingOtp}
                 className={`flex-1 py-2 rounded-md text-white ${
-                  otpInput.length === 4
+                  rideStartOtpInput.length === 4 && !isVerifyingOtp
                     ? "bg-[#0bbfe0] hover:bg-[#0999b3]"
                     : "bg-gray-400 cursor-not-allowed"
                 }`}
               >
-                Verify & Start
+                {isVerifyingOtp ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Verifying...
+                  </div>
+                ) : (
+                  "Verify & Start"
+                )}
               </button>
             </div>
           </motion.div>

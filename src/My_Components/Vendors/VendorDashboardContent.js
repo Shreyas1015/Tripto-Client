@@ -1422,7 +1422,7 @@ const VendorDashboardContent = () => {
                           },
                         },
                       },
-                      // cutout: "70%",
+                      cutout: "70%",
                     }}
                   />
                 </div>

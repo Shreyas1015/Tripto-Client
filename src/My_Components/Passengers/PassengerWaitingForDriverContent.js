@@ -121,9 +121,9 @@ export default function WaitingForDriver() {
   };
 
   // Handle booking cancellation
-  const handleCancelBooking = async () => {
+  const handleCancelBooking = () => {
     try {
-      await axiosInstance.post(
+      const res = axiosInstance.post(
         `${process.env.REACT_APP_BASE_URL}/passengers/cancelBooking`,
         {
           decryptedUID,
@@ -132,8 +132,10 @@ export default function WaitingForDriver() {
         }
       );
 
-      toast.success("Booking cancelled successfully");
-      navigate(`/passengerdashboard?uid=${uid}`);
+      if (res.status === 200) {
+        toast.success("Booking cancelled successfully");
+        navigate(`/passengerdashboard?uid=${uid}`);
+      }
     } catch (error) {
       console.error("Error cancelling booking:", error);
       toast.error("Error cancelling booking");

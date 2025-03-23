@@ -17,6 +17,7 @@ export default function RateDriver() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const rideDetails = location.state?.rideDetails;
+  console.log("rideDetails", rideDetails);
 
   if (!rideDetails) {
     // Redirect if no ride details are available
@@ -40,7 +41,7 @@ export default function RateDriver() {
         `${process.env.REACT_APP_BASE_URL}/passengers/rateDriver`,
         {
           decryptedUID,
-          rideId: rideDetails.id,
+          rideId: rideDetails.bookingId,
           driverId: rideDetails.driverId,
           rating,
           review,

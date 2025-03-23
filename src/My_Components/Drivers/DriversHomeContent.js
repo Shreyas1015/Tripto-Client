@@ -148,18 +148,30 @@ const DriversHomeContent = () => {
           `${process.env.REACT_APP_BASE_URL}/drivers/fetchBookingsDetails`,
           { decryptedUID }
         );
+
         if (res.status === 200) {
-          setBookingsData(res.data);
-          console.log("Bookings Data : ", res.data);
+          if (res.data.length === 0) {
+            // If no trips are found, set an empty array and show a "No trips found" message
+            setBookingsData([]);
+            console.log("No trips found for today.");
+          } else {
+            // If trips are found, update the state with the data
+            setBookingsData(res.data);
+            console.log("Bookings Data:", res.data);
+          }
+        } else {
+          // Handle unexpected status codes
+          toast.error("Unexpected response from the server.");
         }
       } catch (error) {
+        // Handle actual errors (e.g., network issues)
         toast.error("Error Fetching Bookings Details!");
         console.log(error);
       }
     };
 
     fetchBookingsDetails();
-    const intervalId = setInterval(fetchBookingsDetails, 15000); // Poll every 5 seconds
+    const intervalId = setInterval(fetchBookingsDetails, 15000); // Poll every 15 seconds
 
     return () => clearInterval(intervalId);
   }, [decryptedUID]);
@@ -190,10 +202,19 @@ const DriversHomeContent = () => {
 
         // Only redirect to driver-navigation for one-way trips
         if (booking.trip_type === 1) {
-          // For one-way trips (immediate travel), redirect to driver-navigation
-          navigate(`/driver-navigation?uid=${uid}`, {
-            state: { rideDetails: booking },
-          });
+          const currentTime = new Date();
+          const pickupTime = new Date(booking.pickup_date_time);
+
+          // Check if the trip is within the next 30 minutes
+          const timeDifferenceInMinutes =
+            (pickupTime - currentTime) / (1000 * 60);
+
+          if (timeDifferenceInMinutes <= 30 && timeDifferenceInMinutes >= 0) {
+            // For one-way trips (immediate travel), redirect to driver-navigation
+            navigate(`/driver-navigation?uid=${uid}`, {
+              state: { rideDetails: booking },
+            });
+          }
         } else {
           // For round trips (scheduled for future), just go to dashboard
           navigate(`/driversdashboard?uid=${uid}`);
