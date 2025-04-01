@@ -32,6 +32,8 @@ import PassengerRideDetailsPage from "./Pages/Passengers/PassengerRideDetailsPag
 import PassengerRateDriverPage from "./Pages/Passengers/PassengerRateDriverPage";
 import PassengerRoundTripConfirmationPage from "./Pages/Passengers/PassengerRoundTripConfirmationPage";
 import DriverNavigatonPage from "./Pages/Drivers/DriverNavigatonPage";
+import AdminPassengerTripHistoryPage from "./Pages/Admin/AdminPassengerTripHistoryPage";
+import AdminDriverDetailsPage from "./Pages/Admin/AdminDriverDetailsPage";
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -135,6 +137,14 @@ const App = () => {
             <Route
               path="/admin-passenger-details"
               element={<AdminPassengerDetailsPage />}
+            />
+            <Route
+              path="/admin-passenger-trip-history"
+              element={<AdminPassengerTripHistoryPage />}
+            />
+            <Route
+              path="/admin-edit-driver"
+              element={<AdminDriverDetailsPage />}
             />
           </>
           {/* Vendor Routes */}
