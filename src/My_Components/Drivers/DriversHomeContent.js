@@ -175,79 +175,87 @@ const DriversHomeContent = () => {
 
     return () => clearInterval(intervalId);
   }, [decryptedUID]);
+
   const handleSubmit = async (bid, e) => {
     e.preventDefault();
-    console.log("Submitting form for booking ID:", bid);
+    console.log("Form submitted for bid:", bid);
 
-    // Find the booking from the state
+    // Find the particular booking based on bid
     const booking = bookingsData.find((item) => item.bid === bid);
+    console.log("Particular Selected Booking:", booking);
 
     if (!booking) {
+      console.error("Booking not found!");
       toast.error("Booking not found!");
-      console.error("Booking with ID", bid, "not found!");
       return;
     }
 
     try {
-      console.log("Sending request to accept booking...");
+      console.log(
+        "Sending request to API:",
+        `${process.env.REACT_APP_BASE_URL}/drivers/driverAcceptBooking`
+      );
+      console.log("Request payload:", { decryptedUID, booking });
 
       const res = await axiosInstance.post(
         `${process.env.REACT_APP_BASE_URL}/drivers/driverAcceptBooking`,
         { decryptedUID, booking }
       );
 
-      console.log("Response from API:", res.data);
+      console.log("Response received from API:", res);
 
-      if (res.status === 200 && res.data.success) {
-        toast.success("Booking accepted successfully!");
+      if (res.status === 200) {
+        console.log("Booking accepted successfully");
 
-        // Remove the accepted booking from the list
-        setBookingsData((prevBookings) =>
-          prevBookings.filter((item) => item.bid !== bid)
-        );
+        // Optionally, update the state by removing the accepted booking
+        const updatedBookings = bookingsData.filter((item) => item.bid !== bid);
+        setBookingsData(updatedBookings);
 
-        // Convert pickup time to local time zone
-        const pickupDateTimeUTC = new Date(booking.pickup_date_time);
-        const pickupDateTimeLocal = new Date(
-          pickupDateTimeUTC.getTime() +
-            pickupDateTimeUTC.getTimezoneOffset() * 60000
-        );
+        console.log("Updated bookings list:", updatedBookings);
 
-        const currentTimeLocal = new Date();
-
-        const timeDifferenceInMinutes =
-          (pickupDateTimeLocal.getTime() - currentTimeLocal.getTime()) /
-          (1000 * 60);
-
-        console.log("Local Current Time:", currentTimeLocal);
-        console.log("Local Pickup Time:", pickupDateTimeLocal);
-        console.log("Time Difference (minutes):", timeDifferenceInMinutes);
-
-        // Check if the trip is One-Way and within the next 30 minutes
+        // Only redirect to driver-navigation for one-way trips
         if (booking.trip_type === 1) {
+          console.log("Trip type is One-Way");
+
+          // Convert pickup time to local time zone
+          const pickupDateTimeUTC = new Date(booking.pickup_date_time);
+          const pickupDateTimeLocal = new Date(
+            pickupDateTimeUTC.getTime() +
+              pickupDateTimeUTC.getTimezoneOffset() * 60000
+          );
+
+          const currentTimeLocal = new Date();
+
+          const timeDifferenceInMinutes =
+            (pickupDateTimeLocal.getTime() - currentTimeLocal.getTime()) /
+            (1000 * 60);
+
+          console.log("Local Current Time:", currentTimeLocal);
+          console.log("Local Pickup Time:", pickupDateTimeLocal);
+          console.log("Time Difference (minutes):", timeDifferenceInMinutes);
+
           if (timeDifferenceInMinutes <= 30 && timeDifferenceInMinutes >= 0) {
-            console.log("Navigating to driver navigation...");
+            console.log("Redirecting to driver-navigation...");
             navigate(`/driver-navigation?uid=${uid}`, {
               state: { rideDetails: booking },
             });
           } else {
             console.log(
-              "Trip is not within the next 30 minutes, staying on dashboard."
+              "Trip is not within the next 30 minutes, no navigation."
             );
           }
+
+          toast.success("Booking has been accepted!");
         } else {
-          console.log("Round Trip detected, redirecting to dashboard...");
+          console.log(
+            "Trip type is Round-Trip, navigating to drivers dashboard..."
+          );
           navigate(`/driversdashboard?uid=${uid}`);
         }
-      } else {
-        toast.error("Failed to accept the booking. Please try again.");
-        console.error("Error accepting booking:", res.data.message);
       }
     } catch (error) {
-      console.error("Error submitting booking:", error);
-      toast.error(
-        "Error accepting booking! Car type mismatch or network issue."
-      );
+      console.error("Error Submitting Details:", error);
+      toast.error("Error Submitting Details, Car Type does not match");
     }
   };
 
