@@ -907,19 +907,52 @@ export default function PassengerOneWayTripContent() {
   const handlePhaseOne = async (e) => {
     e.preventDefault();
 
+    console.log("🚀 handlePhaseOne triggered!");
+
+    // Check the current date and pickup date
     const now = new Date();
     const pickupDateTime = new Date(oneWayTrip.pickup_date_time);
+    console.log("📌 Current Date & Time:", now);
+    console.log("📌 Selected Pickup Date & Time:", pickupDateTime);
+
+    if (isNaN(pickupDateTime.getTime())) {
+      console.error("❌ Invalid pickup date/time!");
+      toast.error("Invalid pickup date and time selected.");
+      return;
+    }
 
     if (pickupDateTime <= now) {
+      console.warn("⚠️ Pickup date and time must be in the future.");
       toast.error("Pickup date and time must be in the future.");
       return;
     }
 
+    // Check the result of calculatingPrice function
+    console.log("⏳ Calculating price...");
     const { fourSeater, sixSeater, distance } = await calculatingPrice();
+    console.log("✅ Price Calculation Results:", {
+      fourSeater,
+      sixSeater,
+      distance,
+    });
 
-    if (distance === 0) return;
+    if (distance === 0) {
+      console.warn("⚠️ Distance is zero. Cannot proceed.");
+      return;
+    }
 
+    // Check before updating state
+    console.log("📌 Updating state with pid:", pid);
     setOneWayTrip((prevState) => ({ ...prevState, pid }));
+
+    // Check navigate parameters
+    console.log("📌 Navigating to /car-type-selection with data:", {
+      fourSeater,
+      sixSeater,
+      distance,
+      oneWayTrip: { ...oneWayTrip, pid },
+    });
+
     navigate(`/car-type-selection?uid=${uid}`, {
       state: {
         fourSeater,
