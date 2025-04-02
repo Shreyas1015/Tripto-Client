@@ -249,25 +249,27 @@ const DriversHomeContent = () => {
           console.log("📅 Formatted Pickup Date:", formattedDate);
           console.log("⏰ Formatted Pickup Time:", formattedTime);
 
-          // Convert pickup time to IST (India Standard Time)
-          const pickupIST = new Date(booking.pickup_date_time).toLocaleString(
-            "en-US",
-            { timeZone: "Asia/Kolkata" }
-          );
-          const pickupTime = new Date(pickupIST);
-
           // Get current time in IST
-          const currentIST = new Date().toLocaleString("en-US", {
-            timeZone: "Asia/Kolkata",
-          });
-          const currentTime = new Date(currentIST);
+          let today = new Date();
+          let indianTime = new Date(
+            today.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+          );
+          console.log("🕒 Current Indian Time:", indianTime);
+
+          // Combine formattedDate and formattedTime into a single Date object
+          const pickupDateTime = new Date(`${formattedDate} ${formattedTime}`);
+          console.log("🚚 Pickup DateTime:", pickupDateTime);
 
           // Calculate the time difference in minutes
-          const timeDifferenceInMinutes =
-            (pickupTime - currentTime) / (1000 * 60);
-          console.log("⏳ Time Difference (minutes):", timeDifferenceInMinutes);
+          const timeDifferenceInMinutes = Math.floor(
+            (pickupDateTime - indianTime) / (1000 * 60)
+          );
+          console.log(
+            "⏳ Time Difference in Minutes:",
+            timeDifferenceInMinutes
+          );
 
-          // Navigate if the trip is within the next 30 minutes
+          // Navigate based on the time difference
           if (timeDifferenceInMinutes <= 30 && timeDifferenceInMinutes >= 0) {
             console.log("🚗 Redirecting to driver-navigation...");
             navigate(`/driver-navigation?uid=${uid}`, {
@@ -275,8 +277,9 @@ const DriversHomeContent = () => {
             });
           } else {
             console.log(
-              "⏳ Trip is not within the next 30 minutes, no navigation."
+              "⏳ Trip is not within the next 30 minutes, navigating to dashboard..."
             );
+            navigate(`/driversdashboard?uid=${uid}`);
           }
 
           toast.success("🎉 Booking has been accepted!");
