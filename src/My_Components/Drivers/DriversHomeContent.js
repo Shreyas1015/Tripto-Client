@@ -257,7 +257,7 @@ const DriversHomeContent = () => {
   };
 
   const formatDateTime = (isoString) => {
-    const date = new Date(isoString);
+    const date = new Date(isoString); // Convert UTC string to Date object
 
     const formattedDate = date.toLocaleDateString("en-US", {
       year: "numeric",
@@ -268,7 +268,9 @@ const DriversHomeContent = () => {
     const formattedTime = date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "numeric",
-      hour12: true,
+      second: "numeric", // Add seconds if needed
+      hour12: true, // Converts to AM/PM format
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Automatically adjusts for local timezone
     });
 
     return { formattedDate, formattedTime };
