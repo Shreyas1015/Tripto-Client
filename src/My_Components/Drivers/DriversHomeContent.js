@@ -178,50 +178,76 @@ const DriversHomeContent = () => {
 
   const handleSubmit = async (bid, e) => {
     e.preventDefault();
+    console.log("Form submitted for bid:", bid);
 
     // Find the particular booking based on bid
     const booking = bookingsData.find((item) => item.bid === bid);
-    console.log("Particular Selected Booking : ", booking);
+    console.log("Particular Selected Booking:", booking);
+
     if (!booking) {
+      console.error("Booking not found!");
       toast.error("Booking not found!");
       return;
     }
 
     try {
+      console.log(
+        "Sending request to API:",
+        `${process.env.REACT_APP_BASE_URL}/drivers/driverAcceptBooking`
+      );
+      console.log("Request payload:", { decryptedUID, booking });
+
       const res = await axiosInstance.post(
         `${process.env.REACT_APP_BASE_URL}/drivers/driverAcceptBooking`,
-        { decryptedUID, booking } // Send only the particular booking data
+        { decryptedUID, booking }
       );
 
+      console.log("Response received from API:", res);
+
       if (res.status === 200) {
-        toast.success("Booking has been accepted!");
+        console.log("Booking accepted successfully");
 
         // Optionally, update the state by removing the accepted booking
         const updatedBookings = bookingsData.filter((item) => item.bid !== bid);
         setBookingsData(updatedBookings);
 
+        console.log("Updated bookings list:", updatedBookings);
+
         // Only redirect to driver-navigation for one-way trips
         if (booking.trip_type === 1) {
+          console.log("Trip type is One-Way");
+
           const currentTime = new Date();
           const pickupTime = new Date(booking.pickup_date_time);
+          console.log("Current Time:", currentTime);
+          console.log("Pickup Time:", pickupTime);
 
           // Check if the trip is within the next 30 minutes
           const timeDifferenceInMinutes =
             (pickupTime - currentTime) / (1000 * 60);
+          console.log("Time difference in minutes:", timeDifferenceInMinutes);
 
           if (timeDifferenceInMinutes <= 30 && timeDifferenceInMinutes >= 0) {
-            // For one-way trips (immediate travel), redirect to driver-navigation
+            console.log("Redirecting to driver-navigation...");
             navigate(`/driver-navigation?uid=${uid}`, {
               state: { rideDetails: booking },
             });
+          } else {
+            console.log(
+              "Trip is not within the next 30 minutes, no navigation."
+            );
           }
+
+          toast.success("Booking has been accepted!");
         } else {
-          // For round trips (scheduled for future), just go to dashboard
+          console.log(
+            "Trip type is Round-Trip, navigating to drivers dashboard..."
+          );
           navigate(`/driversdashboard?uid=${uid}`);
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error Submitting Details:", error);
       toast.error("Error Submitting Details, Car Type does not match");
     }
   };
