@@ -242,22 +242,21 @@ const DriversHomeContent = () => {
         if (booking.trip_type === 1) {
           console.log("Trip type is One-Way");
 
-          // Convert pickup time using formatDateTime
-          const { formattedTime } = formatDateTime(booking.pickup_date_time);
-          const { formattedTime: currentFormattedTime } = formatDateTime(
-            new Date()
-          );
-
-          console.log("Local Pickup Time:", formattedTime);
-          console.log("Local Current Time:", currentFormattedTime);
-
-          // Convert formatted times to Date objects for comparison
+          // Convert pickup time to Date object
           const pickupTime = new Date(booking.pickup_date_time);
-          const currentTime = new Date();
+
+          // Get current time in India (Mumbai Time Zone)
+          const currentTime = new Date().toLocaleString("en-US", {
+            timeZone: "Asia/Kolkata",
+          });
+
+          const currentISTTime = new Date(currentTime); // Convert string to Date object
 
           // Calculate time difference in minutes
           const timeDifferenceInMinutes =
-            (pickupTime - currentTime) / (1000 * 60);
+            (pickupTime - currentISTTime) / (1000 * 60);
+          console.log("Current Time (IST):", currentISTTime);
+          console.log("Pickup Time:", pickupTime);
           console.log("Time Difference (minutes):", timeDifferenceInMinutes);
 
           if (timeDifferenceInMinutes <= 30 && timeDifferenceInMinutes >= 0) {
