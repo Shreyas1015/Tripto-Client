@@ -257,20 +257,26 @@ const DriversHomeContent = () => {
   };
 
   const formatDateTime = (isoString) => {
+    if (!isoString) return { formattedDate: "N/A", formattedTime: "N/A" };
+
     const date = new Date(isoString); // Convert UTC string to Date object
 
-    const formattedDate = date.toLocaleDateString("en-US", {
+    // Convert to local timezone
+    const localDate = new Date(
+      date.getTime() + date.getTimezoneOffset() * 60000
+    );
+
+    const formattedDate = localDate.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
 
-    const formattedTime = date.toLocaleTimeString("en-US", {
+    const formattedTime = localDate.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "numeric",
       second: "numeric", // Add seconds if needed
       hour12: true, // Converts to AM/PM format
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Automatically adjusts for local timezone
     });
 
     return { formattedDate, formattedTime };
