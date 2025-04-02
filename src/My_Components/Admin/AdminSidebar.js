@@ -259,6 +259,7 @@ const menuItems = [
     href: "/admin-vendor-details",
     subItems: [
       { label: "Vendor Details", href: "/admin-vendor-details" },
+      { label: "Vendor Verification", href: "/admin-vendor-verification" },
       { label: "Fleet Overview", href: "/admin-fleet-overview" },
     ],
   },

@@ -34,6 +34,9 @@ import PassengerRoundTripConfirmationPage from "./Pages/Passengers/PassengerRoun
 import DriverNavigatonPage from "./Pages/Drivers/DriverNavigatonPage";
 import AdminPassengerTripHistoryPage from "./Pages/Admin/AdminPassengerTripHistoryPage";
 import AdminDriverDetailsPage from "./Pages/Admin/AdminDriverDetailsPage";
+import AdminVendorDetailsPage from "./Pages/Admin/AdminVendorDetailsPage";
+import AdminVendorVerificationPage from "./Pages/Admin/AdminVendorVerificationPage";
+import AdminVendorFleetOverviewPage from "./Pages/Admin/AdminVendorFleetOverviewPage";
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -145,6 +148,18 @@ const App = () => {
             <Route
               path="/admin-edit-driver"
               element={<AdminDriverDetailsPage />}
+            />
+            <Route
+              path="/admin-vendor-details"
+              element={<AdminVendorDetailsPage />}
+            />
+            <Route
+              path="/admin-vendor-verification"
+              element={<AdminVendorVerificationPage />}
+            />
+            <Route
+              path="/admin-fleet-overview"
+              element={<AdminVendorFleetOverviewPage />}
             />
           </>
           {/* Vendor Routes */}

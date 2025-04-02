@@ -365,11 +365,11 @@ import {
   Eye,
   Check,
   X,
-  AlertCircle,
+  // AlertCircle,
   Search,
   ArrowLeft,
   User,
-  Badge,
+  // Badge,
 } from "lucide-react";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
