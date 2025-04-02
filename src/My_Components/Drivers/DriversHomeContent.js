@@ -193,7 +193,7 @@ const DriversHomeContent = () => {
 
       const res = await axiosInstance.post(
         `${process.env.REACT_APP_BASE_URL}/drivers/driverAcceptBooking`,
-        { uid: decryptedUID, booking }
+        { decryptedUID, booking }
       );
 
       console.log("Response from API:", res.data);
