@@ -90,12 +90,13 @@ const AdminVendorFleetOverview = () => {
           `${process.env.REACT_APP_BASE_URL}/admin/getVendorFleetStats`,
           { decryptedUID, timeRange }
         );
+
         if (res.status === 200) {
-          console.log("Stats response:", res.data[0]);
-          setStats(res.data);
+          console.log("📊 Stats response:", res.data[0]);
+          setStats(res.data[0]); // Extract first object from the array
         }
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        console.error("❌ Error fetching stats:", error);
         toast.error("Failed to load stats");
       }
     };
@@ -106,7 +107,18 @@ const AdminVendorFleetOverview = () => {
           `${process.env.REACT_APP_BASE_URL}/admin/getVendorRevenueTrend`,
           { decryptedUID, timeRange }
         );
-        if (res.status === 200) setRevenueData(res.data);
+
+        if (res.status === 200) {
+          console.log("Revenue response:", res.data);
+
+          // Ensure revenue is a number
+          const formattedData = res.data.map((item) => ({
+            period: item.period, // Keep period as string
+            revenue: Number(item.revenue) || 0, // Convert revenue to number
+          }));
+
+          setRevenueData(formattedData);
+        }
       } catch (error) {
         console.error("Error fetching revenue data:", error);
         toast.error("Failed to load revenue data");
@@ -119,12 +131,21 @@ const AdminVendorFleetOverview = () => {
           `${process.env.REACT_APP_BASE_URL}/admin/getVendorBookingTrend`,
           { decryptedUID, timeRange }
         );
-        if (res.status === 200) setBookingData(res.data);
+
+        if (res.status === 200) {
+          const formattedData = res.data.map((item) => ({
+            name: new Date(item.bookingDate).toLocaleDateString("en-GB"), // Format date as DD/MM/YYYY
+            bookings: item.totalBookings,
+          }));
+
+          setBookingData(formattedData);
+        }
       } catch (error) {
         console.error("Error fetching booking data:", error);
         toast.error("Failed to load booking data");
       }
     };
+
 
     const fetchPaymentMethods = async () => {
       try {
@@ -132,7 +153,9 @@ const AdminVendorFleetOverview = () => {
           `${process.env.REACT_APP_BASE_URL}/admin/getPaymentMethodDistribution`,
           { decryptedUID, timeRange }
         );
-        if (res.status === 200) setPaymentMethodData(res.data);
+        if (res.status === 200) {
+          setPaymentMethodData(res.data)
+        };
       } catch (error) {
         console.error("Error fetching payment methods:", error);
         toast.error("Failed to load payment methods");
@@ -168,7 +191,7 @@ const AdminVendorFleetOverview = () => {
     const fetchVendorsList = async () => {
       try {
         const res = await axiosInstance.post(
-          `${process.env.REACT_APP_BASE_URL}/admin/getAllVendors`,
+          `${process.env.REACT_APP_BASE_URL}/admin/getFleetAllVendors`,
           { decryptedUID }
         );
         if (res.status === 200) setVendorsList(res.data);
@@ -406,9 +429,8 @@ const AdminVendorFleetOverview = () => {
                 aria-label="Refresh data"
               >
                 <RefreshCw
-                  className={`h-5 w-5 text-gray-600 ${
-                    isLoading ? "animate-spin" : ""
-                  }`}
+                  className={`h-5 w-5 text-gray-600 ${isLoading ? "animate-spin" : ""
+                    }`}
                 />
               </button>
               <button
@@ -434,41 +456,37 @@ const AdminVendorFleetOverview = () => {
           <div className="inline-flex items-center rounded-md shadow-sm">
             <button
               onClick={() => setTimeRange("day")}
-              className={`px-4 py-2 text-sm font-medium rounded-l-md border ${
-                timeRange === "day"
-                  ? "bg-blue-50 text-blue-700 border-blue-300"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-l-md border ${timeRange === "day"
+                ? "bg-blue-50 text-blue-700 border-blue-300"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                }`}
             >
               Today
             </button>
             <button
               onClick={() => setTimeRange("week")}
-              className={`px-4 py-2 text-sm font-medium border-t border-b ${
-                timeRange === "week"
-                  ? "bg-blue-50 text-blue-700 border-blue-300"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-t border-b ${timeRange === "week"
+                ? "bg-blue-50 text-blue-700 border-blue-300"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                }`}
             >
               This Week
             </button>
             <button
               onClick={() => setTimeRange("month")}
-              className={`px-4 py-2 text-sm font-medium border-t border-b ${
-                timeRange === "month"
-                  ? "bg-blue-50 text-blue-700 border-blue-300"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              }`}
+              className={`px-4 py-2 text-sm font-medium border-t border-b ${timeRange === "month"
+                ? "bg-blue-50 text-blue-700 border-blue-300"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                }`}
             >
               This Month
             </button>
             <button
               onClick={() => setTimeRange("year")}
-              className={`px-4 py-2 text-sm font-medium rounded-r-md border ${
-                timeRange === "year"
-                  ? "bg-blue-50 text-blue-700 border-blue-300"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-r-md border ${timeRange === "year"
+                ? "bg-blue-50 text-blue-700 border-blue-300"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                }`}
             >
               This Year
             </button>
@@ -520,8 +538,8 @@ const AdminVendorFleetOverview = () => {
                         <ArrowUpRight className="inline h-4 w-4" />
                         {stats.totalVendors > 0
                           ? Math.round(
-                              (stats.activeVendors / stats.totalVendors) * 100
-                            )
+                            (stats.activeVendors / stats.totalVendors) * 100
+                          )
                           : 0}
                         %
                       </span>
@@ -539,11 +557,10 @@ const AdminVendorFleetOverview = () => {
                     <div
                       className="bg-blue-600 h-1.5 rounded-full"
                       style={{
-                        width: `${
-                          stats.totalVendors > 0
-                            ? (stats.activeVendors / stats.totalVendors) * 100
-                            : 0
-                        }%`,
+                        width: `${stats.totalVendors > 0
+                          ? (stats.activeVendors / stats.totalVendors) * 100
+                          : 0
+                          }%`,
                       }}
                     ></div>
                   </div>
@@ -564,11 +581,10 @@ const AdminVendorFleetOverview = () => {
                         {formatCurrency(stats.totalRevenue)}
                       </h3>
                       <span
-                        className={`ml-2 text-sm font-medium ${
-                          stats.revenueChange >= 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+                        className={`ml-2 text-sm font-medium ${stats.revenueChange >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                          }`}
                       >
                         {stats.revenueChange >= 0 ? (
                           <ArrowUpRight className="inline h-4 w-4" />
@@ -593,7 +609,7 @@ const AdminVendorFleetOverview = () => {
                       style={{
                         width: `${Math.min(
                           (stats.totalRevenue / (stats.totalRevenue * 1.2)) *
-                            100,
+                          100,
                           100
                         )}%`,
                       }}
@@ -616,11 +632,10 @@ const AdminVendorFleetOverview = () => {
                         {stats.totalBookings}
                       </h3>
                       <span
-                        className={`ml-2 text-sm font-medium ${
-                          stats.bookingsChange >= 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+                        className={`ml-2 text-sm font-medium ${stats.bookingsChange >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                          }`}
                       >
                         {stats.bookingsChange >= 0 ? (
                           <ArrowUpRight className="inline h-4 w-4" />
@@ -683,14 +698,14 @@ const AdminVendorFleetOverview = () => {
                       {documentStats.verified +
                         documentStats.pending +
                         documentStats.rejected >
-                      0
+                        0
                         ? Math.round(
-                            (documentStats.verified /
-                              (documentStats.verified +
-                                documentStats.pending +
-                                documentStats.rejected)) *
-                              100
-                          )
+                          (documentStats.verified /
+                            (documentStats.verified +
+                              documentStats.pending +
+                              documentStats.rejected)) *
+                          100
+                        )
                         : 0}
                       %
                     </span>
@@ -699,18 +714,17 @@ const AdminVendorFleetOverview = () => {
                     <div
                       className="bg-yellow-600 h-1.5 rounded-full"
                       style={{
-                        width: `${
-                          documentStats.verified +
-                            documentStats.pending +
-                            documentStats.rejected >
+                        width: `${documentStats.verified +
+                          documentStats.pending +
+                          documentStats.rejected >
                           0
-                            ? (documentStats.verified /
-                                (documentStats.verified +
-                                  documentStats.pending +
-                                  documentStats.rejected)) *
-                              100
-                            : 0
-                        }%`,
+                          ? (documentStats.verified /
+                            (documentStats.verified +
+                              documentStats.pending +
+                              documentStats.rejected)) *
+                          100
+                          : 0
+                          }%`,
                       }}
                     ></div>
                   </div>
@@ -735,10 +749,10 @@ const AdminVendorFleetOverview = () => {
                       {timeRange === "day"
                         ? "Today"
                         : timeRange === "week"
-                        ? "This Week"
-                        : timeRange === "month"
-                        ? "This Month"
-                        : "This Year"}
+                          ? "This Week"
+                          : timeRange === "month"
+                            ? "This Month"
+                            : "This Year"}
                     </span>
                   </div>
                 </div>
@@ -749,18 +763,13 @@ const AdminVendorFleetOverview = () => {
                       margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="name" stroke="#6b7280" />
+                      <XAxis dataKey="period" stroke="#6b7280" /> {/* ✅ Fixed Key */}
                       <YAxis
                         stroke="#6b7280"
-                        tickFormatter={(value) =>
-                          `₹${value.toLocaleString("en-IN")}`
-                        }
+                        tickFormatter={(value) => `₹${value.toLocaleString("en-IN")}`}
                       />
                       <Tooltip
-                        formatter={(value) => [
-                          `₹${value.toLocaleString("en-IN")}`,
-                          "Revenue",
-                        ]}
+                        formatter={(value) => [`₹${value.toLocaleString("en-IN")}`, "Revenue"]}
                         labelFormatter={(label) => `Period: ${label}`}
                       />
                       <Legend />
@@ -812,7 +821,7 @@ const AdminVendorFleetOverview = () => {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value) => [`${value}%`, "Percentage"]}
+                        formatter={(value) => [`${value}`, "Count"]}
                       />
                       <Legend />
                     </RechartsPieChart>
@@ -838,10 +847,10 @@ const AdminVendorFleetOverview = () => {
                       {timeRange === "day"
                         ? "Today"
                         : timeRange === "week"
-                        ? "This Week"
-                        : timeRange === "month"
-                        ? "This Month"
-                        : "This Year"}
+                          ? "This Week"
+                          : timeRange === "month"
+                            ? "This Month"
+                            : "This Year"}
                     </span>
                   </div>
                 </div>
@@ -916,15 +925,14 @@ const AdminVendorFleetOverview = () => {
                             <div
                               className="bg-blue-600 h-1.5 rounded-full"
                               style={{
-                                width: `${
-                                  topVendors[0].revenue > 0
-                                    ? Math.round(
-                                        (vendor.revenue /
-                                          topVendors[0].revenue) *
-                                          100
-                                      )
-                                    : 0
-                                }%`,
+                                width: `${topVendors[0].revenue > 0
+                                  ? Math.round(
+                                    (vendor.revenue /
+                                      topVendors[0].revenue) *
+                                    100
+                                  )
+                                  : 0
+                                  }%`,
                               }}
                             ></div>
                           </div>
