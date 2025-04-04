@@ -37,6 +37,8 @@ import AdminDriverDetailsPage from "./Pages/Admin/AdminDriverDetailsPage";
 import AdminVendorDetailsPage from "./Pages/Admin/AdminVendorDetailsPage";
 import AdminVendorVerificationPage from "./Pages/Admin/AdminVendorVerificationPage";
 import AdminVendorFleetOverviewPage from "./Pages/Admin/AdminVendorFleetOverviewPage";
+import AdminRevenueAnalyticsPage from "./Pages/Admin/AdminRevenueAnalyticsPage";
+import AdminTripStatisticsPage from "./Pages/Admin/AdminTripStatisticsPage";
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -156,6 +158,14 @@ const App = () => {
             <Route
               path="/admin-vendor-verification"
               element={<AdminVendorVerificationPage />}
+            />
+            <Route
+              path="/admin-revenue-analytics"
+              element={<AdminRevenueAnalyticsPage />}
+            />
+            <Route
+              path="/admin-trip-statistics"
+              element={<AdminTripStatisticsPage />}
             />
             <Route
               path="/admin-fleet-overview"

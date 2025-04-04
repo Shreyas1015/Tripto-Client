@@ -120,10 +120,17 @@ export default function WaitingForDriver() {
       .padStart(2, "0")}`;
   };
 
-  // Handle booking cancellation
-  const handleCancelBooking = () => {
+  const handleCancelBooking = async () => {
+
+
+    if (!decryptedUID || !bookingDetails?.id || !cancelReason) {
+      toast.error("Please provide all required details");
+      console.error("Missing fields:", { decryptedUID, bookingId: bookingDetails?.id, cancelReason });
+      return;
+    }
+
     try {
-      const res = axiosInstance.post(
+      const response = await axiosInstance.post(
         `${process.env.REACT_APP_BASE_URL}/passengers/cancelBooking`,
         {
           decryptedUID,
@@ -132,15 +139,18 @@ export default function WaitingForDriver() {
         }
       );
 
-      if (res.status === 200) {
+      console.log("Cancellation Response:", response.data);
+
+      if (response.status === 200) {
         toast.success("Booking cancelled successfully");
         navigate(`/passengerdashboard?uid=${uid}`);
       }
     } catch (error) {
       console.error("Error cancelling booking:", error);
-      toast.error("Error cancelling booking");
+      toast.error(error.response?.data?.error || "Error cancelling booking");
     }
   };
+
 
   if (!bookingDetails) {
     return (
@@ -290,11 +300,10 @@ export default function WaitingForDriver() {
               <button
                 onClick={handleCancelBooking}
                 disabled={!cancelReason}
-                className={`flex-1 py-2 rounded-md text-white ${
-                  cancelReason
-                    ? "bg-red-500 hover:bg-red-600"
-                    : "bg-gray-400 cursor-not-allowed"
-                }`}
+                className={`flex-1 py-2 rounded-md text-white ${cancelReason
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-gray-400 cursor-not-allowed"
+                  }`}
               >
                 Confirm Cancel
               </button>
