@@ -390,446 +390,996 @@
 // };
 
 // export default EnhancedPassengerDashboard;
+"use client"
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useNavigate } from "react-router-dom"
+import secureLocalStorage from "react-secure-storage"
+import { toast, Toaster } from "react-hot-toast"
+import axiosInstance from "../../API/axiosInstance"
 import {
   MapPin,
   Calendar,
   Clock,
+  CreditCard,
+  ChevronDown,
+  Search,
+  Car,
   DollarSign,
-  Currency,
-  CurrencyIcon,
+  ArrowRight,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Truck,
+  BarChart4,
+  TrendingUp,
+  RefreshCw,
+  LogOut,
+  X,
+  FileText,
+  Repeat,
+  ArrowUpRight,
+  ArrowDownRight,
+  Menu,
+  User,
+  Bell,
+  Settings,
+  Home,
   IndianRupee,
-} from "lucide-react";
-import secureLocalStorage from "react-secure-storage";
-import axiosInstance from "../../API/axiosInstance";
-import axios from "axios";
+} from "lucide-react"
 
-export default function EnhancedPassengerDashboard() {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("details");
-  const [progress, setProgress] = useState(66);
-  const [bookings, setBookings] = useState([]);
-  const [selectedTripIndex, setSelectedTripIndex] = useState(null);
-  const uid = localStorage.getItem("@secure.n.uid");
-  const decryptedUID = secureLocalStorage.getItem("uid");
+// Trip status mapping
+const TRIP_STATUS = {
+  0: { label: "Pending", color: "#F59E0B", icon: <Clock size={16} /> },
+  1: { label: "Accepted", color: "#3B82F6", icon: <CheckCircle size={16} /> },
+  2: { label: "Driver Arrived", color: "#10B981", icon: <Car size={16} /> },
+  3: { label: "Trip Started", color: "#8B5CF6", icon: <ArrowRight size={16} /> },
+  4: { label: "Trip In Progress", color: "#6366F1", icon: <TrendingUp size={16} /> },
+  5: { label: "Completed", color: "#059669", icon: <CheckCircle size={16} /> },
+  6: { label: "Cancelled By Passenger", color: "#EF4444", icon: <XCircle size={16} /> },
+  7: { label: "Cancelled By Driver", color: "#DC2626", icon: <XCircle size={16} /> },
+}
+
+// Car type mapping
+const CAR_TYPE = {
+  1: { label: "Sedan", icon: <Car size={16} /> },
+  2: { label: "SUV/MUV", icon: <Truck size={16} /> },
+}
+
+// Payment mode mapping
+const PAYMENT_MODE = {
+  1: { label: "Cash", icon: <IndianRupee size={16} /> },
+  2: { label: "UPI", icon: <CreditCard size={16} /> },
+  3: { label: "Credit Card", icon: <CreditCard size={16} /> },
+}
+
+// Trip type mapping
+const TRIP_TYPE = {
+  1: { label: "One Way", icon: <ArrowRight size={16} /> },
+  2: { label: "Round Trip", icon: <Repeat size={16} /> },
+}
+
+const PassengerDashboard = () => {
+  const navigate = useNavigate()
+  const uid = localStorage.getItem("@secure.n.uid")
+  const decryptedUID = secureLocalStorage.getItem("uid")
+
+  const [isLoading, setIsLoading] = useState(true)
+  const [trips, setTrips] = useState([])
+  const [filteredTrips, setFilteredTrips] = useState([])
+  const [transactions, setTransactions] = useState([])
+  const [pid, setPid] = useState(null)
+  const [stats, setStats] = useState({
+    totalTrips: 0,
+    completedTrips: 0,
+    cancelledTrips: 0,
+    totalSpent: 0,
+    upcomingTrips: 0,
+  })
+  const [activeFilter, setActiveFilter] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedTrip, setSelectedTrip] = useState(null)
+  const [showTripDetails, setShowTripDetails] = useState(false)
+  const [timeRange, setTimeRange] = useState("all") // all, month, year
+  const [monthlySpending, setMonthlySpending] = useState([])
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
+
+  // Fetch passenger trips
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const res = await axiosInstance.post(
-          `${process.env.REACT_APP_BASE_URL}/passengers/fetchBookingsDataTable`,
-          { decryptedUID }
-        );
-
-        const trips = res.data;
-
-        // Process bookings and fetch addresses only if needed
-        const updatedTrips = await Promise.all(
-          trips.map(async (trip) => {
-            const pickupAddress = await getReadableAddress(
-              trip.pickup_location
-            );
-            const dropAddress = await getReadableAddress(trip.drop_location);
-
-            return {
-              ...trip,
-              pickup_location: pickupAddress,
-              drop_location: dropAddress,
-            };
-          })
-        );
-
-        setBookings(updatedTrips);
-      } catch (error) {
-        console.error("Bookings Data Fetch Error: ", error.message);
-      }
-    };
-
-    fetchBookings();
-  }, [decryptedUID]);
-
-  // Function to check if a location is in lat,lng format
-  const isLatLngFormat = (location) => {
-    return /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(location);
-  };
-
-  // Function to fetch an address if it's in lat,lng format
-  const getReadableAddress = async (location) => {
-    if (!location) return "Unknown Location";
-
-    if (isLatLngFormat(location)) {
-      const [lat, lng] = location.split(",").map((val) => val.trim());
-      return await reverseGeocode(lat, lng);
+    if (decryptedUID) {
+      fetchTrips()
     }
+  }, [decryptedUID])
 
-    return location; // If it's already a proper address, return as is
-  };
+  // Fetch transactions when pid is available
+  useEffect(() => {
+    if (decryptedUID && pid) {
+      fetchTransactions()
+    }
+  }, [decryptedUID, pid])
 
-  const reverseGeocode = async (lat, lng) => {
+  // Filter trips when filter or search changes
+  useEffect(() => {
+    if (trips.length > 0) {
+      let filtered = [...trips]
+
+      // Apply status filter
+      if (activeFilter !== "all") {
+        filtered = filtered.filter((trip) => {
+          if (activeFilter === "upcoming") {
+            return [0, 1, 2, 3, 4].includes(trip.trip_status)
+          } else if (activeFilter === "completed") {
+            return trip.trip_status === 5
+          } else if (activeFilter === "cancelled") {
+            return [6, 7].includes(trip.trip_status)
+          }
+          return true
+        })
+      }
+
+      // Apply time range filter
+      if (timeRange !== "all") {
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        const startOfYear = new Date(now.getFullYear(), 0, 1)
+
+        filtered = filtered.filter((trip) => {
+          const tripDate = new Date(trip.pickup_date_time)
+          if (timeRange === "month") {
+            return tripDate >= startOfMonth
+          } else if (timeRange === "year") {
+            return tripDate >= startOfYear
+          }
+          return true
+        })
+      }
+
+      // Apply search filter
+      if (searchTerm) {
+        filtered = filtered.filter(
+          (trip) =>
+            trip.pickup_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            trip.drop_location?.toLowerCase().includes(searchTerm.toLowerCase()),
+        )
+      }
+
+      setFilteredTrips(filtered)
+    }
+  }, [trips, activeFilter, searchTerm, timeRange])
+
+  // Calculate stats and monthly spending when transactions or trips change
+  useEffect(() => {
+    if (trips.length > 0 && transactions.length > 0) {
+      calculateStats()
+      calculateMonthlySpending()
+      setDataLoaded(true)
+    }
+  }, [trips, transactions])
+
+  const calculateStats = () => {
+    const totalTrips = trips.length
+    const completedTrips = trips.filter((trip) => trip.trip_status === 5).length
+    const cancelledTrips = trips.filter((trip) => [6, 7].includes(trip.trip_status)).length
+    const upcomingTrips = trips.filter((trip) => [0, 1, 2, 3, 4].includes(trip.trip_status)).length
+
+    // Calculate total spent from transactions
+    const totalSpent = transactions.reduce((sum, transaction) => sum + Number.parseFloat(transaction.amount || 0), 0)
+
+    setStats({
+      totalTrips,
+      completedTrips,
+      cancelledTrips,
+      totalSpent,
+      upcomingTrips,
+    })
+  }
+
+  const fetchTrips = async () => {
+    setIsLoading(true)
     try {
-      if (!lat || !lng) {
-        return "Unknown Location";
+      const response = await axiosInstance.post(`${process.env.REACT_APP_BASE_URL}/passengers/fetchPassengerTrips`, {
+        decryptedUID,
+      })
+
+      if (response.status === 200) {
+        // Sort trips by date (newest first)
+        const sortedTrips = response.data.sort((a, b) => new Date(b.pickup_date_time) - new Date(a.pickup_date_time))
+        setTrips(sortedTrips)
+        setFilteredTrips(sortedTrips)
+
+        // Extract passenger ID from the first trip
+        if (sortedTrips.length > 0 && sortedTrips[0].pid) {
+          setPid(sortedTrips[0].pid)
+        }
       }
-
-      const apiKey = process.env.REACT_APP_OLA_API_KEY;
-      if (!apiKey) {
-        console.error("❌ Ola Maps API Key is missing in .env file!");
-        return "Unknown Location";
-      }
-
-      // Construct the API URL
-      const reverseGeocodeUrl = `https://api.olamaps.io/places/v1/reverse-geocode?latlng=${lat},${lng}&api_key=${apiKey}`;
-
-      // Make the request
-      const response = await axios.get(reverseGeocodeUrl, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      // Check if response contains valid data
-      if (
-        !response.data ||
-        !response.data.results ||
-        response.data.results.length === 0
-      ) {
-        console.error("⚠️ No valid reverse geocoding results found.");
-        return "Unknown Location";
-      }
-
-      return response.data.results[0].formatted_address;
     } catch (error) {
-      console.error(
-        "❌ Reverse Geocoding Error:",
-        error.response?.data || error.message
-      );
-      return "Unknown Location";
+      console.error("Error fetching trips:", error)
+      toast.error("Failed to load trip data")
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
-  useEffect(() => {
-    const timer = setTimeout(() => setProgress(100), 3000);
-    return () => clearTimeout(timer);
-  }, []);
+  const fetchTransactions = async () => {
+    try {
+      const response = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/passengers/fetchPassengerTransactions`,
+        {
+          decryptedUID,
+          passenger_id: pid,
+        },
+      )
+
+      if (response.status === 200) {
+        setTransactions(response.data)
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error)
+    }
+  }
+
+  const calculateMonthlySpending = () => {
+    // Create a map to store monthly spending
+    const spending = {}
+
+    // Get current date to calculate last 6 months
+    const now = new Date()
+
+    // Initialize last 6 months with zero values
+    for (let i = 5; i >= 0; i--) {
+      const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const monthKey = month.toLocaleString("default", { month: "short", year: "numeric" })
+      spending[monthKey] = 0
+    }
+
+    // Add transaction amounts to the corresponding months
+    transactions.forEach((txn) => {
+      const date = new Date(txn.created_at)
+      const monthKey = date.toLocaleString("default", { month: "short", year: "numeric" })
+
+      // Only include transactions from the last 6 months
+      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+      if (date >= sixMonthsAgo && spending.hasOwnProperty(monthKey)) {
+        spending[monthKey] += Number.parseFloat(txn.amount || 0)
+      }
+    })
+
+    // Convert to array format for the chart
+    const spendingArray = Object.entries(spending).map(([month, amount]) => ({
+      month,
+      amount,
+    }))
+
+    setMonthlySpending(spendingArray)
+  }
+
+  const refreshData = async () => {
+    setIsRefreshing(true)
+    setDataLoaded(false)
+    await fetchTrips()
+    if (pid) {
+      await fetchTransactions()
+    }
+    toast.success("Data refreshed successfully")
+    setIsRefreshing(false)
+  }
+
+  const viewTripDetails = (trip) => {
+    setSelectedTrip(trip)
+    setShowTripDetails(true)
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A"
+    const date = new Date(dateString)
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  const formatTime = (dateString) => {
+    if (!dateString) return "N/A"
+    const date = new Date(dateString)
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(amount || 0)
+  }
+
+  const getStatusBadge = (status) => {
+    const statusInfo = TRIP_STATUS[status] || {
+      label: "Unknown",
+      color: "#6B7280",
+      icon: <AlertCircle size={16} />,
+    }
+
+    return (
+      <div
+        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+        style={{
+          backgroundColor: `${statusInfo.color}20`,
+          color: statusInfo.color,
+        }}
+      >
+        <span className="mr-1">{statusInfo.icon}</span>
+        {statusInfo.label}
+      </div>
+    )
+  }
+
+  const getPaymentBadge = (mode) => {
+    const paymentInfo = PAYMENT_MODE[mode] || {
+      label: "Unknown",
+      icon: <AlertCircle size={16} />,
+    }
+
+    return (
+      <div className="inline-flex items-center text-gray-700">
+        <span className="mr-1">{paymentInfo.icon}</span>
+        {paymentInfo.label}
+      </div>
+    )
+  }
+
+  const getTripTypeBadge = (type) => {
+    const tripInfo = TRIP_TYPE[type] || {
+      label: "Unknown",
+      icon: <AlertCircle size={16} />,
+    }
+
+    return (
+      <div className="inline-flex items-center text-gray-700">
+        <span className="mr-1">{tripInfo.icon}</span>
+        {tripInfo.label}
+      </div>
+    )
+  }
+
+  const getCarTypeBadge = (type) => {
+    const carInfo = CAR_TYPE[type] || {
+      label: "Unknown",
+      icon: <Car size={16} />,
+    }
+
+    return (
+      <div className="inline-flex items-center text-gray-700">
+        <span className="mr-1">{carInfo.icon}</span>
+        {carInfo.label}
+      </div>
+    )
+  }
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  }
 
   const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
+    hidden: { scale: 0.95, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 20 },
+    },
+    hover: {
+      scale: 1.02,
+      boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+      transition: { type: "spring", stiffness: 300, damping: 20 },
+    },
+  }
 
-  const BackToLogin = () => {
-    navigate("/");
-  };
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.8, y: 50 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 300, damping: 25 },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.8,
+      y: 50,
+      transition: { duration: 0.2 },
+    },
+  }
+
+  // Calculate max amount for chart scaling
+  const maxAmount = useMemo(() => {
+    if (monthlySpending.length === 0) return 0
+    return Math.max(...monthlySpending.map((d) => d.amount))
+  }, [monthlySpending])
 
   if (!uid) {
     return (
-      <div className="container text-center fw-bold">
-        <h2>INVALID URL. Please provide a valid UID.</h2>
-        <button className="" onClick={BackToLogin}>
-          Back to Login
-        </button>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Invalid Access</h2>
+          <p className="text-gray-600 mb-6">Please provide a valid user ID to access this page.</p>
+          <button
+            onClick={() => navigate("/")}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center mx-auto"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Back to Login
+          </button>
+        </div>
       </div>
-    );
+    )
   }
 
-  const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
-  };
-
-  const selectedTrip = bookings[selectedTripIndex] || {};
-
   return (
-    <>
-      {/* <div className="min-h-screen bg-gradient-to-br from-[#e6f7fb] to-[#e0f2f7] p-8">
-        <div className="max-w-7xl mx-auto"> */}
-      {/* Header */}
-      <header className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="h-16 w-16 ring-2 ring-[#0bbfe0] rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-white">
-              JD
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#0bbfe0] to-[#077286]">
-                Passenger Dashboard
-              </h1>
-              <p className="text-gray-500">Welcome back!</p>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Trip List */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h2 className="text-xl font-bold mb-4">Your Trips</h2>
-            <div className="h-[600px] overflow-y-auto pr-4">
-              {bookings.map((trip, index) => (
-                <motion.div
-                  key={trip.bid}
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="mb-4 bg-white p-4 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => setSelectedTripIndex(index)}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold">Trip ID: {trip.bid}</p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(trip.pickup_date_time).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <span className="px-2 py-1 bg-gradient-to-r from-[#0bbfe0] to-[#077286] text-white rounded-lg">
-                      {trip.trip_status == 0
-                        ? "Pending"
-                        : trip.trip_status == 1
-                        ? "Accepted"
-                        : "Completed"}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
+      <div className="min-h-screen">
+        <div className="p-6 max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">My Trips</h1>
+              <p className="text-gray-600">View and manage all your trips</p>
+            </div>
+
+            <div className="mt-4 md:mt-0 flex items-center space-x-3">
+              <button
+                onClick={refreshData}
+                disabled={isRefreshing}
+                className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                {isRefreshing ? "Refreshing..." : "Refresh"}
+              </button>
+
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                <Car className="mr-2 h-4 w-4" />
+                Book a Ride
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* Trip Details */}
-        <div className="lg:col-span-2 space-y-8">
-          {selectedTripIndex !== null ? (
-            <div>
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <button
-                  onClick={() => setActiveTab("details")}
-                  className={`p-4 text-lg font-semibold border-b-4 ${
-                    activeTab === "details"
-                      ? "border-[#0bbfe0] text-[#0bbfe0]"
-                      : "border-transparent text-gray-500"
-                  }`}
+          {/* Stats Cards */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          >
+            <motion.div variants={cardVariants} whileHover="hover" className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Total Trips</p>
+                  <h3 className="text-2xl font-bold mt-1">{stats.totalTrips}</h3>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-lg text-blue-600">
+                  <Car className="h-6 w-6" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center text-sm">
+                <span className="text-green-600 flex items-center">
+                  <ArrowUpRight className="h-4 w-4 mr-1" />
+                  {Math.round((stats.completedTrips / (stats.totalTrips || 1)) * 100)}%
+                </span>
+                <span className="ml-2 text-gray-500">completion rate</span>
+              </div>
+            </motion.div>
+
+            <motion.div variants={cardVariants} whileHover="hover" className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Total Spent</p>
+                  <h3 className="text-2xl font-bold mt-1">{formatCurrency(stats.totalSpent)}</h3>
+                </div>
+                <div className="p-3 bg-green-100 rounded-lg text-green-600">
+                  <IndianRupee className="h-6 w-6" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center text-sm">
+                <span className="text-gray-500">
+                  Avg. {formatCurrency(stats.totalSpent / (stats.completedTrips || 1))} per trip
+                </span>
+              </div>
+            </motion.div>
+
+            <motion.div variants={cardVariants} whileHover="hover" className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Completed Trips</p>
+                  <h3 className="text-2xl font-bold mt-1">{stats.completedTrips}</h3>
+                </div>
+                <div className="p-3 bg-green-100 rounded-lg text-green-600">
+                  <CheckCircle className="h-6 w-6" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center text-sm">
+                <span
+                  className={`flex items-center ${stats.completedTrips > stats.cancelledTrips ? "text-green-600" : "text-red-600"}`}
                 >
-                  Trip Details
+                  {stats.completedTrips > stats.cancelledTrips ? (
+                    <ArrowUpRight className="h-4 w-4 mr-1" />
+                  ) : (
+                    <ArrowDownRight className="h-4 w-4 mr-1" />
+                  )}
+                  {stats.completedTrips - stats.cancelledTrips}
+                </span>
+                <span className="ml-2 text-gray-500">vs cancelled</span>
+              </div>
+            </motion.div>
+
+            <motion.div variants={cardVariants} whileHover="hover" className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Upcoming Trips</p>
+                  <h3 className="text-2xl font-bold mt-1">{stats.upcomingTrips}</h3>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-lg text-purple-600">
+                  <Calendar className="h-6 w-6" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center text-sm">
+                <span className="text-gray-500">
+                  {stats.upcomingTrips > 0 ? "Trips scheduled" : "No upcoming trips"}
+                </span>
+              </div>
+            </motion.div>
+          </motion.div>
+
+
+          {/* <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover="hover"
+            className="bg-white p-6 rounded-xl shadow-sm mb-8"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-800">Monthly Spending</h2>
+              <div className="flex items-center text-sm text-gray-500">
+                <BarChart4 className="h-4 w-4 mr-1" />
+                Last 6 months
+              </div>
+            </div>
+
+            {isLoading || !dataLoaded ? (
+              <div className="h-64 flex items-center justify-center">
+                <RefreshCw className="h-8 w-8 text-blue-500 animate-spin" />
+              </div>
+            ) : (
+              <div className="h-64 flex items-end space-x-2">
+                {monthlySpending.map((data, index) => {
+                  // Calculate height percentage (minimum 5% for visibility)
+                  const heightPercentage = maxAmount > 0 ? Math.max((data.amount / maxAmount) * 100, 5) : 5
+
+                  return (
+                    <div key={index} className="flex-1 flex flex-col items-center">
+                      <div className="w-full h-full flex items-end justify-center">
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: `${heightPercentage}%` }}
+                          transition={{ duration: 0.5, delay: index * 0.1 }}
+                          className="w-full bg-blue-500 rounded-t-md"
+                          style={{ maxWidth: "40px" }}
+                        />
+                      </div>
+                      <div className="mt-2 text-xs text-gray-600">{data.month}</div>
+                      <div className="text-xs font-medium">{formatCurrency(data.amount)}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </motion.div> */}
+
+          {/* Filters and Search */}
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setActiveFilter("all")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${activeFilter === "all" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                >
+                  All Trips
                 </button>
                 <button
-                  onClick={() => setActiveTab("route")}
-                  className={`p-4 text-lg font-semibold border-b-4 ${
-                    activeTab === "route"
-                      ? "border-[#0bbfe0] text-[#0bbfe0]"
-                      : "border-transparent text-gray-500"
-                  }`}
+                  onClick={() => setActiveFilter("upcoming")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${activeFilter === "upcoming"
+                    ? "bg-purple-100 text-purple-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
-                  Route
+                  Upcoming
                 </button>
                 <button
-                  onClick={() => setActiveTab("payment")}
-                  className={`p-4 text-lg font-semibold border-b-4 ${
-                    activeTab === "payment"
-                      ? "border-[#0bbfe0] text-[#0bbfe0]"
-                      : "border-transparent text-gray-500"
-                  }`}
+                  onClick={() => setActiveFilter("completed")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${activeFilter === "completed"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
-                  Payment
+                  Completed
+                </button>
+                <button
+                  onClick={() => setActiveFilter("cancelled")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${activeFilter === "cancelled"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                >
+                  Cancelled
                 </button>
               </div>
-              <AnimatePresence mode="wait">
-                {activeTab === "details" && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="bg-white p-6 rounded-lg shadow-lg"
-                  >
-                    <h2 className="text-2xl font-bold mb-4 flex items-center space-x-2">
-                      <Calendar className="h-6 w-6 text-[#0bbfe0]" />
-                      <span>Trip Schedule</span>
-                    </h2>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <label className="font-semibold text-gray-600 mb-2">
-                          Pick-Up Date & Time
-                        </label>
-                        <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#0bbfe0]" />
-                          <input
-                            className="border border-gray-300 rounded pl-10 py-2 w-full"
-                            value={formatDateTime(
-                              selectedTrip.pickup_date_time
-                            )}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="font-semibold text-gray-600 mb-2">
-                          Return Date & Time
-                        </label>
-                        <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#0bbfe0]" />
-                          <input
-                            className="border border-gray-300 rounded pl-10 py-2 w-full"
-                            value={formatDateTime(selectedTrip.drop_date_time)}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="font-semibold text-gray-600 mb-2 ">
-                          Duration
-                        </label>
-                        <input
-                          className="border border-gray-300 rounded p-2 w-full"
-                          value={`${
-                            selectedTrip.no_of_days == null
-                              ? "1 day"
-                              : selectedTrip.no_of_days + " days"
-                          } `}
-                          readOnly
-                        />
-                      </div>
-                      <div>
-                        <label className="font-semibold text-gray-600 mb-2 ">
-                          Trip Type
-                        </label>
-                        <input
-                          className="border border-gray-300 rounded p-2 w-full"
-                          value={
-                            selectedTrip.trip_type == 1
-                              ? "One-Way Trip"
-                              : selectedTrip.trip_type == 2
-                              ? "Round Trip"
-                              : "Trip Not Selected"
-                          }
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
 
-                {activeTab === "route" && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="bg-white p-6 rounded-lg shadow-lg"
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <select
+                    value={timeRange}
+                    onChange={(e) => setTimeRange(e.target.value)}
+                    className="pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
                   >
-                    <h2 className="text-2xl font-bold mb-4 flex items-center space-x-2">
-                      <MapPin className="h-6 w-6 text-[#0bbfe0]" />
-                      <span>Trip Route</span>
-                    </h2>
-                    <div className="space-y-6">
-                      {/* First Row: Pick-Up and Drop Locations */}
-                      <div className="flex space-x-4">
-                        <div className="flex-1">
-                          <label className="font-semibold text-gray-600 mb-2">
-                            Pick-Up Location
-                          </label>
-                          <input
-                            className="border border-gray-300 rounded p-2 w-full"
-                            value={selectedTrip.pickup_location}
-                            readOnly
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <label className="font-semibold text-gray-600 mb-2">
-                            Drop Location
-                          </label>
-                          <input
-                            className="border border-gray-300 rounded p-2 w-full"
-                            value={selectedTrip.drop_location}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                      {/* Second Row: Vehicle Model and Distance */}
-                      <div className="flex space-x-4">
-                        <div className="flex-1">
-                          <label className="font-semibold text-gray-600 mb-2">
-                            Vehicle Model
-                          </label>
-                          <input
-                            className="border border-gray-300 rounded p-2 w-full"
-                            value={
-                              selectedTrip.selected_car === 1
-                                ? "4+1 (SEDAN)"
-                                : selectedTrip.selected_car === 2
-                                ? "6+1 (SUV, MUV)"
-                                : "No Car Selected"
-                            }
-                            readOnly
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <label className="font-semibold text-gray-600 mb-2">
-                            Distance
-                          </label>
-                          <input
-                            className="border border-gray-300 rounded p-2 w-full"
-                            value={selectedTrip.distance + " KM"}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
+                    <option value="all">All Time</option>
+                    <option value="month">This Month</option>
+                    <option value="year">This Year</option>
+                  </select>
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
 
-                {activeTab === "payment" && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="bg-white p-6 rounded-lg shadow-lg"
-                  >
-                    <h2 className="text-2xl font-bold mb-4 flex items-center space-x-2">
-                      <IndianRupee className="h-6 w-6 text-[#0bbfe0]" />
-                      <span>Payment Details</span>
-                    </h2>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <label className="font-semibold text-gray-600 mb-2">
-                          Total Fare
-                        </label>
-                        <input
-                          className="border border-gray-300 rounded p-2 w-full"
-                          value={`Rs. ${selectedTrip.price}`}
-                          readOnly
-                        />
-                      </div>
-                      <div>
-                        <label className="font-semibold text-gray-600 mb-2">
-                          Payment Status
-                        </label>
-                        <input
-                          className="border border-gray-300 rounded p-2 w-full"
-                          value={selectedTrip.payment_status}
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search locations..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-              <h2 className="text-2xl font-semibold">
-                Select a trip to view details.
-              </h2>
-            </div>
-          )}
+          </div>
+
+          {/* Trips List */}
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="flex flex-col items-center">
+                  <RefreshCw className="h-12 w-12 text-blue-500 animate-spin mb-4" />
+                  <p className="text-gray-600">Loading your trips...</p>
+                </div>
+              </div>
+            ) : filteredTrips.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 p-6 text-center">
+                <Car className="h-16 w-16 text-gray-300 mb-4" />
+                <h3 className="text-lg font-medium text-gray-800 mb-2">No trips found</h3>
+                <p className="text-gray-500 max-w-md">
+                  {searchTerm
+                    ? "No trips match your search criteria. Try adjusting your filters."
+                    : "You haven't taken any trips yet. Book your first ride now!"}
+                </p>
+                <button className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                  <Car className="mr-2 h-4 w-4" />
+                  Book a Ride
+                </button>
+              </div>
+            ) : (
+              <motion.div variants={containerVariants} initial="hidden" animate="visible">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Trip Details
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Date & Time
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Car Type
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Amount
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Status
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredTrips.map((trip) => (
+                        <motion.tr
+                          key={trip.bid}
+                          variants={itemVariants}
+                          className="hover:bg-gray-50 cursor-pointer"
+                          onClick={() => viewTripDetails(trip)}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                {TRIP_TYPE[trip.trip_type]?.icon || <Car className="h-5 w-5 text-blue-600" />}
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {getTripTypeBadge(trip.trip_type)}
+                                </div>
+                                <div className="text-sm text-gray-500 mt-1 flex items-center">
+                                  <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                                  <span className="truncate max-w-xs">{trip.pickup_location || "N/A"}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{formatDate(trip.pickup_date_time)}</div>
+                            <div className="text-sm text-gray-500">{formatTime(trip.pickup_date_time)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">{getCarTypeBadge(trip.selected_car)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{formatCurrency(trip.price)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(trip.trip_status)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                viewTripDetails(trip)
+                              }}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              View Details
+                            </button>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
-      {/* </div>
-      </div> */}
-    </>
-  );
+
+      {/* Trip Details Modal */}
+      <AnimatePresence>
+        {showTripDetails && selectedTrip && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <motion.div
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6 border-b sticky top-0 bg-white z-10 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-gray-900">Trip Details</h3>
+                <button onClick={() => setShowTripDetails(false)} className="text-gray-400 hover:text-gray-500">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                {/* Trip Status */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      {getStatusBadge(selectedTrip.trip_status)}
+                      <span className="ml-2 text-sm text-gray-500">
+                        {selectedTrip.trip_status === 5 ? "Completed on" : "Last updated"}:{" "}
+                        {formatDate(selectedTrip.pickup_date_time)}
+                      </span>
+                    </div>
+                    <div>{getTripTypeBadge(selectedTrip.trip_type)}</div>
+                  </div>
+                </div>
+
+                {/* Trip Route */}
+                <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                  <div className="flex items-start mb-4">
+                    <div className="flex flex-col items-center mr-4">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <div className="w-0.5 h-16 bg-gray-300 my-1"></div>
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="mb-4">
+                        <p className="text-xs text-gray-500">PICKUP LOCATION</p>
+                        <p className="text-sm font-medium">{selectedTrip.pickup_location || "N/A"}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formatDate(selectedTrip.pickup_date_time)} • {formatTime(selectedTrip.pickup_date_time)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">DROP LOCATION</p>
+                        <p className="text-sm font-medium">{selectedTrip.drop_location || "N/A"}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formatDate(selectedTrip.drop_date_time)} • {formatTime(selectedTrip.drop_date_time)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <div>
+                      <span className="text-gray-500">Distance:</span>
+                      <span className="ml-1 font-medium">{selectedTrip.distance || "N/A"}</span>
+                    </div>
+                    {selectedTrip.trip_type === 2 && (
+                      <div>
+                        <span className="text-gray-500">Duration:</span>
+                        <span className="ml-1 font-medium">{selectedTrip.no_of_days || 0} days</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Trip Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-3">RIDE DETAILS</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Car Type</span>
+                        <span className="text-sm font-medium">{getCarTypeBadge(selectedTrip.selected_car)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Booking ID</span>
+                        <span className="text-sm font-medium">#{selectedTrip.bid}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Driver ID</span>
+                        <span className="text-sm font-medium">#{selectedTrip.did || "Not assigned"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Passenger</span>
+                        <span className="text-sm font-medium">{selectedTrip.passenger_name || "N/A"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-3">PAYMENT DETAILS</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Amount</span>
+                        <span className="text-sm font-medium">{formatCurrency(selectedTrip.price)}</span>
+                      </div>
+
+                      {/* Find transaction for this trip */}
+                      {transactions.find((tx) => tx.bid === selectedTrip.bid) ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Payment Method</span>
+                            <span className="text-sm font-medium">
+                              {getPaymentBadge(transactions.find((tx) => tx.bid === selectedTrip.bid)?.payment_mode)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Payment Status</span>
+                            <span className="text-sm font-medium text-green-600 flex items-center">
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Paid
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Transaction ID</span>
+                            <span className="text-sm font-medium">
+                              #{transactions.find((tx) => tx.bid === selectedTrip.bid)?.txn_id || "N/A"}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Payment Status</span>
+                          {selectedTrip.trip_status === 5 ? (
+                            <span className="text-sm font-medium text-green-600 flex items-center">
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Paid
+                            </span>
+                          ) : (
+                            <span className="text-sm font-medium text-yellow-600 flex items-center">
+                              <Clock className="h-4 w-4 mr-1" />
+                              Pending
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-wrap gap-3 justify-end pt-4 border-t">
+                  {selectedTrip.trip_status === 0 && (
+                    <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                      Cancel Trip
+                    </button>
+                  )}
+
+                  {[1, 2, 3, 4].includes(selectedTrip.trip_status) && (
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Track Ride
+                    </button>
+                  )}
+
+                  {selectedTrip.trip_status === 5 && (
+                    <>
+                      <button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                        <FileText className="mr-2 h-4 w-4" />
+                        Download Invoice
+                      </button>
+                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        <Repeat className="mr-2 h-4 w-4" />
+                        Book Similar Trip
+                      </button>
+                    </>
+                  )}
+
+                  <button
+                    onClick={() => setShowTripDetails(false)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
 }
+
+export default PassengerDashboard
+

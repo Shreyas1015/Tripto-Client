@@ -16,7 +16,7 @@ const DriversSidebar = (props) => {
   const navigate = useNavigate();
   const uid = localStorage.getItem("@secure.n.uid");
   const decryptedUID = secureLocalStorage.getItem("uid");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [validDriver, setValidDriver] = useState(0);
 
   const BackToLogin = () => {
@@ -89,9 +89,8 @@ const DriversSidebar = (props) => {
         </div>
 
         <div
-          className={`sidebar bg-gradient-to-b from-[#0bbfe0] to-[#077286] text-white transition-all duration-300 ease-in-out ${
-            isOpen ? "sidebar--open" : ""
-          }`}
+          className={`sidebar bg-gradient-to-b from-[#0bbfe0] to-[#077286] text-white transition-all duration-300 ease-in-out ${isOpen ? "sidebar--open" : ""
+            }`}
         >
           <div className="flex items-center justify-between mb-8 hover:bg-white/20 p-2 rounded-md">
             {/* Avatar with initials */}
