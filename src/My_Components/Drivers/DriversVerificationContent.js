@@ -2196,6 +2196,7 @@ export default function DriverDocumentVerification() {
         if (docLinksResponse.data.fitnessCertificate) setFitnessCertificate(docLinksResponse.data.fitnessCertificate)
         if (docLinksResponse.data.taxReceipt) setTaxReceipt(docLinksResponse.data.taxReceipt)
 
+
         // Initialize updatedProfileData with current profile data
         setUpdatedProfileData({
           uid: decryptedUID,
@@ -2616,8 +2617,8 @@ export default function DriverDocumentVerification() {
           <button
             onClick={() => setActiveSection("personal")}
             className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeSection === "personal"
-                ? "text-cyan-600 border-b-2 border-cyan-500"
-                : "text-gray-600 hover:text-cyan-500"
+              ? "text-cyan-600 border-b-2 border-cyan-500"
+              : "text-gray-600 hover:text-cyan-500"
               }`}
           >
             <User size={18} className="mr-2" />
@@ -2634,8 +2635,8 @@ export default function DriverDocumentVerification() {
           <button
             onClick={() => setActiveSection("documents")}
             className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeSection === "documents"
-                ? "text-cyan-600 border-b-2 border-cyan-500"
-                : "text-gray-600 hover:text-cyan-500"
+              ? "text-cyan-600 border-b-2 border-cyan-500"
+              : "text-gray-600 hover:text-cyan-500"
               }`}
           >
             <FileText size={18} className="mr-2" />

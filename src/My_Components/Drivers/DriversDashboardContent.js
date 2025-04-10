@@ -1849,7 +1849,7 @@ export default function DriverDashboard() {
       setIsLoading(true) // Start loading
       try {
         // Fetch profile first to get `did`
-        const profileRes = await axiosInstance.post(`${process.env.REACT_APP_BASE_URL}/drivers/fetchProfileData`, {
+        const profileRes = await axiosInstance.post(`${process.env.REACT_APP_BASE_URL}/drivers/fetchDriverProfileData`, {
           decryptedUID,
         })
 
