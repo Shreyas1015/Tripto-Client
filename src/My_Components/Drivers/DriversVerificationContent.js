@@ -2601,349 +2601,349 @@ export default function DriverDocumentVerification() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-cyan-500 to-teal-600 rounded-t-2xl p-6 text-white">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center">
-            <FileCheck className="mr-3" size={28} />
-            Driver Document Verification
-          </h1>
-          <p className="opacity-90">Complete your profile and upload required documents to get verified</p>
-        </div>
+    // <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+    <div className="max-w-8xl mx-auto">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-cyan-500 to-teal-600 rounded-t-2xl p-6 text-white">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center">
+          <FileCheck className="mr-3" size={28} />
+          Driver Document Verification
+        </h1>
+        <p className="opacity-90">Complete your profile and upload required documents to get verified</p>
+      </div>
 
-        {/* Navigation Tabs */}
-        <div className="bg-white border-b border-gray-200 flex overflow-x-auto">
-          <button
-            onClick={() => setActiveSection("personal")}
-            className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeSection === "personal"
-              ? "text-cyan-600 border-b-2 border-cyan-500"
-              : "text-gray-600 hover:text-cyan-500"
-              }`}
-          >
-            <User size={18} className="mr-2" />
-            Personal Information
-          </button>
-          <button
-            onClick={() => setActiveSection("car")}
-            className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeSection === "car" ? "text-cyan-600 border-b-2 border-cyan-500" : "text-gray-600 hover:text-cyan-500"
-              }`}
-          >
-            <Car size={18} className="mr-2" />
-            Car Information
-          </button>
-          <button
-            onClick={() => setActiveSection("documents")}
-            className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeSection === "documents"
-              ? "text-cyan-600 border-b-2 border-cyan-500"
-              : "text-gray-600 hover:text-cyan-500"
-              }`}
-          >
-            <FileText size={18} className="mr-2" />
-            Documents
-          </button>
-        </div>
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-gray-200 flex overflow-x-auto">
+        <button
+          onClick={() => setActiveSection("personal")}
+          className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeSection === "personal"
+            ? "text-cyan-600 border-b-2 border-cyan-500"
+            : "text-gray-600 hover:text-cyan-500"
+            }`}
+        >
+          <User size={18} className="mr-2" />
+          Personal Information
+        </button>
+        <button
+          onClick={() => setActiveSection("car")}
+          className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeSection === "car" ? "text-cyan-600 border-b-2 border-cyan-500" : "text-gray-600 hover:text-cyan-500"
+            }`}
+        >
+          <Car size={18} className="mr-2" />
+          Car Information
+        </button>
+        <button
+          onClick={() => setActiveSection("documents")}
+          className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeSection === "documents"
+            ? "text-cyan-600 border-b-2 border-cyan-500"
+            : "text-gray-600 hover:text-cyan-500"
+            }`}
+        >
+          <FileText size={18} className="mr-2" />
+          Documents
+        </button>
+      </div>
 
-        {/* Content Area */}
-        <div className="bg-white rounded-b-2xl shadow-lg p-6">
-          <AnimatePresence mode="wait">
-            {activeSection === "personal" && (
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center">
-                    <User className="mr-2 text-cyan-600" />
-                    Personal Information
-                  </h2>
-                  <p className="text-gray-600 mb-4">
-                    Update your personal details below. Make sure your information is accurate.
-                  </p>
+      {/* Content Area */}
+      <div className="bg-white rounded-b-2xl  p-6">
+        <AnimatePresence mode="wait">
+          {activeSection === "personal" && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                  <User className="mr-2 text-cyan-600" />
+                  Personal Information
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Update your personal details below. Make sure your information is accurate.
+                </p>
+              </div>
+
+              <form onSubmit={handleProfileEdit} className="space-y-4">
+                <input type="hidden" name="uid" value={decryptedUID} />
+
+                <div className="space-y-2">
+                  <label htmlFor="name" className="block font-medium text-gray-700">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User size={18} className="absolute left-3 top-3 text-gray-400" />
+                    <input
+                      name="name"
+                      type="text"
+                      className="pl-10 w-full py-2  border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
+                      onChange={handleChange}
+                      value={updatedProfileData.name || ""}
+                      placeholder={profileData.name}
+                    />
+                  </div>
                 </div>
 
-                <form onSubmit={handleProfileEdit} className="space-y-4">
-                  <input type="hidden" name="uid" value={decryptedUID} />
-
-                  <div className="space-y-2">
-                    <label htmlFor="name" className="block font-medium text-gray-700">
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <User size={18} className="absolute left-3 top-3 text-gray-400" />
+                <div className="space-y-2">
+                  <label htmlFor="email" className="block font-medium text-gray-700">
+                    Email Address
+                  </label>
+                  <div className="flex flex-col md:flex-row gap-2">
+                    <div className="relative flex-grow">
+                      <Mail size={18} className="absolute left-3 top-3 text-gray-400" />
                       <input
-                        name="name"
-                        type="text"
-                        className="pl-10 w-full py-2  border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
-                        onChange={handleChange}
-                        value={updatedProfileData.name || ""}
-                        placeholder={profileData.name}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="block font-medium text-gray-700">
-                      Email Address
-                    </label>
-                    <div className="flex flex-col md:flex-row gap-2">
-                      <div className="relative flex-grow">
-                        <Mail size={18} className="absolute left-3 top-3 text-gray-400" />
-                        <input
-                          name="email"
-                          type="email"
-                          className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
-                          value={updatedProfileData.email || ""}
-                          placeholder={profileData.email}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleEmailVerification}
-                        className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg hover:shadow-md transition-all duration-300 flex items-center justify-center"
-                      >
-                        <Mail size={16} className="mr-2" />
-                        Send OTP
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="emailOtp" className="block font-medium text-gray-700">
-                      Email Verification Code
-                    </label>
-                    <div className="flex flex-col md:flex-row gap-2">
-                      <div className="relative flex-grow">
-                        <Shield size={18} className="absolute left-3 top-3 text-gray-400" />
-                        <input
-                          type="text"
-                          id="emailOtp"
-                          name="emailOtp"
-                          className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
-                          value={updatedProfileData.emailOtp || ""}
-                          placeholder="Enter verification code"
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={confirmEmailVerification}
-                        className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg hover:shadow-md transition-all duration-300 flex items-center justify-center"
-                      >
-                        <CheckCircle size={16} className="mr-2" />
-                        Verify OTP
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="block font-medium text-gray-700">
-                      Phone Number
-                    </label>
-                    <div className="relative">
-                      <Phone size={18} className="absolute left-3 top-3 text-gray-400" />
-                      <input
-                        name="phone_number"
-                        type="text"
+                        name="email"
+                        type="email"
                         className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
-                        value={updatedProfileData.phone_number || ""}
-                        placeholder={profileData.phone_number}
+                        value={updatedProfileData.email || ""}
+                        placeholder={profileData.email}
                         onChange={handleChange}
                       />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleEmailVerification}
+                      className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg hover:shadow-md transition-all duration-300 flex items-center justify-center"
+                    >
+                      <Mail size={16} className="mr-2" />
+                      Send OTP
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="emailOtp" className="block font-medium text-gray-700">
+                    Email Verification Code
+                  </label>
+                  <div className="flex flex-col md:flex-row gap-2">
+                    <div className="relative flex-grow">
+                      <Shield size={18} className="absolute left-3 top-3 text-gray-400" />
+                      <input
+                        type="text"
+                        id="emailOtp"
+                        name="emailOtp"
+                        className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
+                        value={updatedProfileData.emailOtp || ""}
+                        placeholder="Enter verification code"
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={confirmEmailVerification}
+                      className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg hover:shadow-md transition-all duration-300 flex items-center justify-center"
+                    >
+                      <CheckCircle size={16} className="mr-2" />
+                      Verify OTP
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="phone" className="block font-medium text-gray-700">
+                    Phone Number
+                  </label>
+                  <div className="relative">
+                    <Phone size={18} className="absolute left-3 top-3 text-gray-400" />
+                    <input
+                      name="phone_number"
+                      type="text"
+                      className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
+                      value={updatedProfileData.phone_number || ""}
+                      placeholder={profileData.phone_number}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center"
+                >
+                  <Save size={18} className="mr-2" />
+                  Update Profile
+                </button>
+              </form>
+            </div>
+          )}
+
+          {activeSection === "car" && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                  <Car className="mr-2 text-cyan-600" />
+                  Car Information
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Provide details about your vehicle. This information cannot be changed once submitted.
+                </p>
+              </div>
+
+              <form onSubmit={handleCarForm} className="space-y-4">
+                <input type="hidden" name="uid" value={decryptedUID} />
+
+                <div className="space-y-2">
+                  <label htmlFor="car_name" className="block font-medium text-gray-700">
+                    Car Name
+                  </label>
+                  <div className="relative">
+                    <Car size={18} className="absolute left-3 top-3 text-gray-400" />
+                    <input
+                      type="text"
+                      name="car_name"
+                      className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
+                      onChange={handleInputChange}
+                      required
+                      placeholder={carDetails2.car_name || "Enter car name"}
+                      value={carDetails.car_name || ""}
+                      disabled={carDetails2.submit_status === 1}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="model_year" className="block font-medium text-gray-700">
+                    Model Year
+                  </label>
+                  <div className="relative">
+                    <Calendar size={18} className="absolute left-3 top-3 text-gray-400" />
+                    <select
+                      className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all appearance-none"
+                      name="model_year"
+                      onChange={handleInputChange}
+                      value={carDetails2.submit_status === 1 ? carDetails2.model_year : carDetails.model_year}
+                      disabled={carDetails2.submit_status === 1}
+                    >
+                      <option value="">Choose Model Year</option>
+                      {generateYearOptions()}
+                    </select>
+                    <ChevronDown size={18} className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="car_number" className="block font-medium text-gray-700">
+                    Car Number
+                  </label>
+                  <div className="relative">
+                    <Hash size={18} className="absolute left-3 top-3 text-gray-400" />
+                    <input
+                      type="text"
+                      name="car_number"
+                      className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
+                      onChange={handleInputChange}
+                      required
+                      placeholder={carDetails2.car_number || "Format: MH04CG7475"}
+                      value={carDetails2.submit_status === 1 ? carDetails2.car_number : carDetails.car_number}
+                      disabled={carDetails2.submit_status === 1}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="car_type" className="block font-medium text-gray-700">
+                    Car Type
+                  </label>
+                  <div className="relative">
+                    <Type size={18} className="absolute left-3 top-3 text-gray-400" />
+                    <select
+                      name="car_type"
+                      className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all appearance-none"
+                      onChange={handleInputChange}
+                      required
+                      value={carDetails2.submit_status === 1 ? carDetails2.car_type : carDetails.car_type}
+                      disabled={carDetails2.submit_status === 1}
+                    >
+                      <option value="">Choose Car Type</option>
+                      <option value={1}>4+1 (SEDAN)</option>
+                      <option value={2}>6+1 (SUV, MUV)</option>
+                    </select>
+                    <ChevronDown size={18} className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                {carDetails2.submit_status === 1 ? (
+                  <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 flex items-center">
+                    <CheckCircle size={20} className="mr-2 flex-shrink-0" />
+                    <p>Car details have been saved successfully. These details cannot be modified.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 flex items-center">
+                      <AlertCircle size={20} className="mr-2 flex-shrink-0" />
+                      <p>Note: Once car details are submitted, you will not be able to update them again.</p>
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center"
+                    >
+                      <Save size={18} className="mr-2" />
+                      Save Car Details
+                    </button>
+                  </>
+                )}
+              </form>
+            </div>
+          )}
+
+          {activeSection === "documents" && (
+            <div>
+              {statusIndicators.all_documents_status === 1 ? (
+                <div className="p-8 text-center">
+                  <div>
+                    <CheckCircle size={80} className="mx-auto text-emerald-500 mb-4" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-emerald-700 mb-2">All Documents Verified!</h2>
+                  <p className="text-gray-600 mb-6">
+                    Congratulations! All your documents have been verified successfully.
+                  </p>
+                  <button
+                    onClick={() => setActiveSection("personal")}
+                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                  >
+                    Go to Profile
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-6">
+                    <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                      <FileText className="mr-2 text-cyan-600" />
+                      Document Verification
+                    </h2>
+                    <p className="text-gray-600 mb-4">
+                      Upload all required documents for verification. Make sure all documents are clear and legible.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center">
+                        <User className="mr-2 text-cyan-600" />
+                        Personal Documents
+                      </h3>
+                      <div className="space-y-2">{personalDocuments.map((doc) => renderDocumentItem(doc))}</div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center">
+                        <Car className="mr-2 text-cyan-600" />
+                        Vehicle Documents
+                      </h3>
+                      <div className="space-y-2">{vehicleDocuments.map((doc) => renderDocumentItem(doc))}</div>
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center"
+                    className="w-full mt-8 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center"
                   >
-                    <Save size={18} className="mr-2" />
-                    Update Profile
+                    <Upload size={18} className="mr-2" />
+                    Submit Documents
                   </button>
                 </form>
-              </div>
-            )}
-
-            {activeSection === "car" && (
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center">
-                    <Car className="mr-2 text-cyan-600" />
-                    Car Information
-                  </h2>
-                  <p className="text-gray-600 mb-4">
-                    Provide details about your vehicle. This information cannot be changed once submitted.
-                  </p>
-                </div>
-
-                <form onSubmit={handleCarForm} className="space-y-4">
-                  <input type="hidden" name="uid" value={decryptedUID} />
-
-                  <div className="space-y-2">
-                    <label htmlFor="car_name" className="block font-medium text-gray-700">
-                      Car Name
-                    </label>
-                    <div className="relative">
-                      <Car size={18} className="absolute left-3 top-3 text-gray-400" />
-                      <input
-                        type="text"
-                        name="car_name"
-                        className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
-                        onChange={handleInputChange}
-                        required
-                        placeholder={carDetails2.car_name || "Enter car name"}
-                        value={carDetails.car_name || ""}
-                        disabled={carDetails2.submit_status === 1}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="model_year" className="block font-medium text-gray-700">
-                      Model Year
-                    </label>
-                    <div className="relative">
-                      <Calendar size={18} className="absolute left-3 top-3 text-gray-400" />
-                      <select
-                        className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all appearance-none"
-                        name="model_year"
-                        onChange={handleInputChange}
-                        value={carDetails2.submit_status === 1 ? carDetails2.model_year : carDetails.model_year}
-                        disabled={carDetails2.submit_status === 1}
-                      >
-                        <option value="">Choose Model Year</option>
-                        {generateYearOptions()}
-                      </select>
-                      <ChevronDown size={18} className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="car_number" className="block font-medium text-gray-700">
-                      Car Number
-                    </label>
-                    <div className="relative">
-                      <Hash size={18} className="absolute left-3 top-3 text-gray-400" />
-                      <input
-                        type="text"
-                        name="car_number"
-                        className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
-                        onChange={handleInputChange}
-                        required
-                        placeholder={carDetails2.car_number || "Format: MH04CG7475"}
-                        value={carDetails2.submit_status === 1 ? carDetails2.car_number : carDetails.car_number}
-                        disabled={carDetails2.submit_status === 1}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="car_type" className="block font-medium text-gray-700">
-                      Car Type
-                    </label>
-                    <div className="relative">
-                      <Type size={18} className="absolute left-3 top-3 text-gray-400" />
-                      <select
-                        name="car_type"
-                        className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all appearance-none"
-                        onChange={handleInputChange}
-                        required
-                        value={carDetails2.submit_status === 1 ? carDetails2.car_type : carDetails.car_type}
-                        disabled={carDetails2.submit_status === 1}
-                      >
-                        <option value="">Choose Car Type</option>
-                        <option value={1}>4+1 (SEDAN)</option>
-                        <option value={2}>6+1 (SUV, MUV)</option>
-                      </select>
-                      <ChevronDown size={18} className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
-                    </div>
-                  </div>
-
-                  {carDetails2.submit_status === 1 ? (
-                    <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 flex items-center">
-                      <CheckCircle size={20} className="mr-2 flex-shrink-0" />
-                      <p>Car details have been saved successfully. These details cannot be modified.</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 flex items-center">
-                        <AlertCircle size={20} className="mr-2 flex-shrink-0" />
-                        <p>Note: Once car details are submitted, you will not be able to update them again.</p>
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center"
-                      >
-                        <Save size={18} className="mr-2" />
-                        Save Car Details
-                      </button>
-                    </>
-                  )}
-                </form>
-              </div>
-            )}
-
-            {activeSection === "documents" && (
-              <div>
-                {statusIndicators.all_documents_status === 1 ? (
-                  <div className="p-8 text-center">
-                    <div>
-                      <CheckCircle size={80} className="mx-auto text-emerald-500 mb-4" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-emerald-700 mb-2">All Documents Verified!</h2>
-                    <p className="text-gray-600 mb-6">
-                      Congratulations! All your documents have been verified successfully.
-                    </p>
-                    <button
-                      onClick={() => setActiveSection("personal")}
-                      className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300"
-                    >
-                      Go to Profile
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit}>
-                    <div className="mb-6">
-                      <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center">
-                        <FileText className="mr-2 text-cyan-600" />
-                        Document Verification
-                      </h2>
-                      <p className="text-gray-600 mb-4">
-                        Upload all required documents for verification. Make sure all documents are clear and legible.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4 flex items-center">
-                          <User className="mr-2 text-cyan-600" />
-                          Personal Documents
-                        </h3>
-                        <div className="space-y-2">{personalDocuments.map((doc) => renderDocumentItem(doc))}</div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4 flex items-center">
-                          <Car className="mr-2 text-cyan-600" />
-                          Vehicle Documents
-                        </h3>
-                        <div className="space-y-2">{vehicleDocuments.map((doc) => renderDocumentItem(doc))}</div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full mt-8 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center"
-                    >
-                      <Upload size={18} className="mr-2" />
-                      Submit Documents
-                    </button>
-                  </form>
-                )}
-              </div>
-            )}
-          </AnimatePresence>
-        </div>
+              )}
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
+    // </div>
   )
 }
 

@@ -34,8 +34,8 @@ export default function VendorCarTypeSelection() {
         selectedCar === "4 + 1"
           ? fourSeater
           : selectedCar === "6 + 1"
-          ? sixSeater
-          : 0;
+            ? sixSeater
+            : 0;
       const car_type =
         selectedCar === "4 + 1" ? 1 : selectedCar === "6 + 1" ? 2 : 0;
 
@@ -63,6 +63,9 @@ export default function VendorCarTypeSelection() {
         passenger_phone: oneWayTrip
           ? oneWayTrip.passenger_phone
           : roundTrip.passenger_phone,
+        passenger_email: oneWayTrip
+          ? oneWayTrip.passenger_email
+          : roundTrip.passenger_email,
       };
 
       try {
@@ -130,11 +133,10 @@ export default function VendorCarTypeSelection() {
                     key={car.type}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`flex items-center justify-between p-5 rounded-xl border-2 transition-all duration-200 ${
-                      selectedCar === car.type
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-blue-300"
-                    }`}
+                    className={`flex items-center justify-between p-5 rounded-xl border-2 transition-all duration-200 ${selectedCar === car.type
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-blue-300"
+                      }`}
                   >
                     <input
                       type="radio"
@@ -174,9 +176,8 @@ export default function VendorCarTypeSelection() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className={`flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-colors ${
-                  !selectedCar ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-colors ${!selectedCar ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 disabled={!selectedCar}
               >
                 Confirm Booking <ArrowRight className="ml-2 h-5 w-5" />
@@ -196,6 +197,10 @@ export default function VendorCarTypeSelection() {
                   <p>
                     <span className="font-medium">Phone:</span>{" "}
                     {oneWayTrip.passenger_phone}
+                  </p>
+                  <p>
+                    <span className="font-medium">Phone:</span>{" "}
+                    {oneWayTrip.passenger_email}
                   </p>
                   <p>
                     <span className="font-medium">Trip Type:</span> One Way
@@ -221,6 +226,11 @@ export default function VendorCarTypeSelection() {
                     <span className="font-medium">Phone:</span>{" "}
                     {roundTrip.passenger_phone}
                   </p>
+                  <p>
+                    <span className="font-medium">Email:</span>{" "}
+                    {roundTrip.passenger_email}
+                  </p>
+
                   <p>
                     <span className="font-medium">Trip Type:</span> Round Trip
                   </p>

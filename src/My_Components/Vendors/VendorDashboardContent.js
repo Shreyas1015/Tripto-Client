@@ -928,19 +928,19 @@ const VendorDashboardContent = () => {
         data:
           vendorBookingStatusData.length > 0
             ? [
-                Number.parseInt(
-                  vendorBookingStatusData[0].completed_bookings || 0
-                ),
-                Number.parseInt(
-                  vendorBookingStatusData[0].pending_bookings || 0
-                ),
-                Number.parseInt(
-                  vendorBookingStatusData[0].cancelled_by_driver || 0
-                ) +
-                  Number.parseInt(
-                    vendorBookingStatusData[0].cancelled_by_passenger || 0
-                  ),
-              ]
+              Number.parseInt(
+                vendorBookingStatusData[0].completed_bookings || 0
+              ),
+              Number.parseInt(
+                vendorBookingStatusData[0].pending_bookings || 0
+              ),
+              Number.parseInt(
+                vendorBookingStatusData[0].cancelled_by_driver || 0
+              ) +
+              Number.parseInt(
+                vendorBookingStatusData[0].cancelled_by_passenger || 0
+              ),
+            ]
             : [0, 0, 0],
         backgroundColor: ["#4ade80", "#f59e0b", "#ef4444"],
         borderWidth: 0,
@@ -987,29 +987,43 @@ const VendorDashboardContent = () => {
       case 1:
         return "Accepted";
       case 2:
-        return "Completed";
+        return "Driver Arrived";
       case 3:
-        return "Cancelled";
+        return "Trip Started";
+      case 4:
+        return "Trip In Progress";
+      case 5:
+        return "Completed";
+      case 6:
+        return "Cancelled By Passenger";
+      case 7:
+        return "Cancelled By Driver";
       default:
         return "Unknown";
     }
   };
 
+
   // Get status color
   const getStatusColor = (status) => {
     switch (status) {
       case 0:
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800"; // Pending
       case 1:
-        return "bg-blue-100 text-blue-800";
       case 2:
-        return "bg-green-100 text-green-800";
       case 3:
-        return "bg-red-100 text-red-800";
+      case 4:
+        return "bg-blue-100 text-blue-800"; // Active ride statuses
+      case 5:
+        return "bg-green-100 text-green-800"; // Completed
+      case 6:
+      case 7:
+        return "bg-red-100 text-red-800"; // Cancelled
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800"; // Unknown
     }
   };
+
 
   // Animation variants
   const containerVariants = {
@@ -1062,9 +1076,8 @@ const VendorDashboardContent = () => {
           <div className="flex items-center space-x-3 mt-4 md:mt-0">
             <button
               onClick={handleRefresh}
-              className={`flex items-center px-4 py-2 rounded-md text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-all ${
-                isRefreshing ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`flex items-center px-4 py-2 rounded-md text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-all ${isRefreshing ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               disabled={isRefreshing}
             >
               <RefreshCw
@@ -1180,31 +1193,28 @@ const VendorDashboardContent = () => {
               <div className="flex mt-4 sm:mt-0 p-1 bg-gray-100 rounded-md">
                 <button
                   onClick={() => setActiveTab("weekly")}
-                  className={`px-3 py-1 text-sm rounded-md transition-all ${
-                    activeTab === "weekly"
-                      ? "bg-white shadow-sm text-gray-800"
-                      : "text-gray-500"
-                  }`}
+                  className={`px-3 py-1 text-sm rounded-md transition-all ${activeTab === "weekly"
+                    ? "bg-white shadow-sm text-gray-800"
+                    : "text-gray-500"
+                    }`}
                 >
                   Weekly
                 </button>
                 <button
                   onClick={() => setActiveTab("monthly")}
-                  className={`px-3 py-1 text-sm rounded-md transition-all ${
-                    activeTab === "monthly"
-                      ? "bg-white shadow-sm text-gray-800"
-                      : "text-gray-500"
-                  }`}
+                  className={`px-3 py-1 text-sm rounded-md transition-all ${activeTab === "monthly"
+                    ? "bg-white shadow-sm text-gray-800"
+                    : "text-gray-500"
+                    }`}
                 >
                   Monthly
                 </button>
                 <button
                   onClick={() => setActiveTab("yearly")}
-                  className={`px-3 py-1 text-sm rounded-md transition-all ${
-                    activeTab === "yearly"
-                      ? "bg-white shadow-sm text-gray-800"
-                      : "text-gray-500"
-                  }`}
+                  className={`px-3 py-1 text-sm rounded-md transition-all ${activeTab === "yearly"
+                    ? "bg-white shadow-sm text-gray-800"
+                    : "text-gray-500"
+                    }`}
                 >
                   Yearly
                 </button>
@@ -1278,31 +1288,30 @@ const VendorDashboardContent = () => {
                         <div
                           className="bg-green-500 h-2 rounded-full"
                           style={{
-                            width: `${
-                              vendorBookingStatusData.length > 0
-                                ? (Number.parseInt(
+                            width: `${vendorBookingStatusData.length > 0
+                              ? (Number.parseInt(
+                                vendorBookingStatusData[0]
+                                  .completed_bookings || 0
+                              ) /
+                                (Number.parseInt(
+                                  vendorBookingStatusData[0]
+                                    .completed_bookings || 0
+                                ) +
+                                  Number.parseInt(
                                     vendorBookingStatusData[0]
-                                      .completed_bookings || 0
-                                  ) /
-                                    (Number.parseInt(
-                                      vendorBookingStatusData[0]
-                                        .completed_bookings || 0
-                                    ) +
-                                      Number.parseInt(
-                                        vendorBookingStatusData[0]
-                                          .pending_bookings || 0
-                                      ) +
-                                      Number.parseInt(
-                                        vendorBookingStatusData[0]
-                                          .cancelled_by_driver || 0
-                                      ) +
-                                      Number.parseInt(
-                                        vendorBookingStatusData[0]
-                                          .cancelled_by_passenger || 0
-                                      ))) *
-                                  100
-                                : 0
-                            }%`,
+                                      .pending_bookings || 0
+                                  ) +
+                                  Number.parseInt(
+                                    vendorBookingStatusData[0]
+                                      .cancelled_by_driver || 0
+                                  ) +
+                                  Number.parseInt(
+                                    vendorBookingStatusData[0]
+                                      .cancelled_by_passenger || 0
+                                  ))) *
+                              100
+                              : 0
+                              }%`,
                           }}
                         ></div>
                       </div>
@@ -1321,31 +1330,30 @@ const VendorDashboardContent = () => {
                         <div
                           className="bg-yellow-500 h-2 rounded-full"
                           style={{
-                            width: `${
-                              vendorBookingStatusData.length > 0
-                                ? (Number.parseInt(
+                            width: `${vendorBookingStatusData.length > 0
+                              ? (Number.parseInt(
+                                vendorBookingStatusData[0]
+                                  .pending_bookings || 0
+                              ) /
+                                (Number.parseInt(
+                                  vendorBookingStatusData[0]
+                                    .completed_bookings || 0
+                                ) +
+                                  Number.parseInt(
                                     vendorBookingStatusData[0]
                                       .pending_bookings || 0
-                                  ) /
-                                    (Number.parseInt(
-                                      vendorBookingStatusData[0]
-                                        .completed_bookings || 0
-                                    ) +
-                                      Number.parseInt(
-                                        vendorBookingStatusData[0]
-                                          .pending_bookings || 0
-                                      ) +
-                                      Number.parseInt(
-                                        vendorBookingStatusData[0]
-                                          .cancelled_by_driver || 0
-                                      ) +
-                                      Number.parseInt(
-                                        vendorBookingStatusData[0]
-                                          .cancelled_by_passenger || 0
-                                      ))) *
-                                  100
-                                : 0
-                            }%`,
+                                  ) +
+                                  Number.parseInt(
+                                    vendorBookingStatusData[0]
+                                      .cancelled_by_driver || 0
+                                  ) +
+                                  Number.parseInt(
+                                    vendorBookingStatusData[0]
+                                      .cancelled_by_passenger || 0
+                                  ))) *
+                              100
+                              : 0
+                              }%`,
                           }}
                         ></div>
                       </div>
@@ -1370,35 +1378,34 @@ const VendorDashboardContent = () => {
                         <div
                           className="bg-red-500 h-2 rounded-full"
                           style={{
-                            width: `${
-                              vendorBookingStatusData.length > 0
-                                ? ((Number.parseInt(
+                            width: `${vendorBookingStatusData.length > 0
+                              ? ((Number.parseInt(
+                                vendorBookingStatusData[0]
+                                  .cancelled_by_driver || 0
+                              ) +
+                                Number.parseInt(
+                                  vendorBookingStatusData[0]
+                                    .cancelled_by_passenger || 0
+                                )) /
+                                (Number.parseInt(
+                                  vendorBookingStatusData[0]
+                                    .completed_bookings || 0
+                                ) +
+                                  Number.parseInt(
+                                    vendorBookingStatusData[0]
+                                      .pending_bookings || 0
+                                  ) +
+                                  Number.parseInt(
                                     vendorBookingStatusData[0]
                                       .cancelled_by_driver || 0
                                   ) +
-                                    Number.parseInt(
-                                      vendorBookingStatusData[0]
-                                        .cancelled_by_passenger || 0
-                                    )) /
-                                    (Number.parseInt(
-                                      vendorBookingStatusData[0]
-                                        .completed_bookings || 0
-                                    ) +
-                                      Number.parseInt(
-                                        vendorBookingStatusData[0]
-                                          .pending_bookings || 0
-                                      ) +
-                                      Number.parseInt(
-                                        vendorBookingStatusData[0]
-                                          .cancelled_by_driver || 0
-                                      ) +
-                                      Number.parseInt(
-                                        vendorBookingStatusData[0]
-                                          .cancelled_by_passenger || 0
-                                      ))) *
-                                  100
-                                : 0
-                            }%`,
+                                  Number.parseInt(
+                                    vendorBookingStatusData[0]
+                                      .cancelled_by_passenger || 0
+                                  ))) *
+                              100
+                              : 0
+                              }%`,
                           }}
                         ></div>
                       </div>
@@ -1674,17 +1681,16 @@ const VendorDashboardContent = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            driver.car_type == 1
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-purple-100 text-purple-800"
-                          }`}
+                          className={`px-2 py-1 text-xs rounded-full ${driver.car_type == 1
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-purple-100 text-purple-800"
+                            }`}
                         >
                           {driver.car_type == 1
                             ? "Sedan"
                             : driver.car_type == 2
-                            ? "SUV"
-                            : "Unknown"}
+                              ? "SUV"
+                              : "Unknown"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

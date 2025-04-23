@@ -500,6 +500,26 @@ const DriversHomeContent = () => {
     return { formattedDate, formattedTime };
   };
 
+  // Add this function to send email notification
+  const sendEmailNotification = async (email) => {
+    try {
+      const res = await axiosInstance.post(`${process.env.REACT_APP_BASE_URL}/drivers/sendVendorOtp`, {
+        email,
+        decryptedUID
+      })
+
+      if (res.data.success) {
+        toast.success("Email notification sent to passenger")
+      } else {
+        toast.error("Failed to send email notification")
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Failed to send email notification")
+      throw error // Rethrow to handle in the calling function
+    }
+  }
+
   const handleSubmit = async (bid, e) => {
     e.preventDefault();
     console.log("🚀 Form submitted for bid:", bid);
@@ -529,6 +549,17 @@ const DriversHomeContent = () => {
 
       if (res.status === 200) {
         console.log("🎉 Booking accepted successfully");
+
+        // If it's a vendor booking and has passenger email, send notification email
+        if (booking.vid && booking.passenger_email) {
+          try {
+            await sendEmailNotification(booking.passenger_email)
+            console.log("📧 Email notification sent to passenger")
+          } catch (emailError) {
+            console.error("❌ Error sending email notification:", emailError)
+            // Continue with booking process even if email fails
+          }
+        }
 
         const updatedBookings = bookingsData.filter((item) => item.bid !== bid);
         setBookingsData(updatedBookings);

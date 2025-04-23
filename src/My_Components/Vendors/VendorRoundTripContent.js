@@ -5,6 +5,7 @@ import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import { ArrowRight, MapPin, Calendar, User, Phone, Clock } from "lucide-react";
 import toast from "react-hot-toast";
+import { differenceInCalendarDays, differenceInDays, isBefore, isFuture, parseISO } from "date-fns";
 
 export default function VendorRoundTripContent() {
   const navigate = useNavigate();
@@ -175,9 +176,9 @@ export default function VendorRoundTripContent() {
         const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos((lat1 * Math.PI) / 180) *
-            Math.cos((lat2 * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distance = R * c; // Distance in km
         return distance;
@@ -323,6 +324,88 @@ export default function VendorRoundTripContent() {
     }
   };
 
+  // const calculatingPrice = async () => {
+  //   try {
+  //     const distance = await fetchDistance(
+  //       roundTrip.pickup_location,
+  //       roundTrip.drop_location
+  //     );
+
+  //     console.log("Fetched Distance: ", distance);
+
+  //     // Handle invalid or zero distance
+  //     if (!distance || distance <= 0) {
+  //       console.log("Distance is invalid or zero. Unable to calculate price.");
+  //       toast.error(
+  //         "Unable to calculate price due to missing or invalid distance."
+  //       );
+  //       return { fourSeater: 0, sixSeater: 0, distance: 0 };
+  //     }
+
+  //     // // Calculate number of days here
+  //     // const pickupDate = new Date(roundTrip.pickup_date_time);
+  //     // const returnDate = new Date(roundTrip.return_date_time);
+  //     // const timeDifference = returnDate.getTime() - pickupDate.getTime();
+  //     // const numberOfDays = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+  //     // console.log("Calculated Number of Days: ", numberOfDays);
+
+  //     // Calculate number of days
+  //     const numberOfDays = differenceInDays(
+  //       parseISO(roundTrip.return_date_time),
+  //       parseISO(roundTrip.pickup_date_time)
+  //     );
+  //     console.log("Calculated Number of Days: ", numberOfDays);
+
+  //     const inputKM = distance * 2; // Round trip distance
+  //     console.log("Input Kilometers (Round Trip): ", inputKM);
+
+  //     // Calculate per-day charges
+  //     const perDayCharges = numberOfDays * 300;
+  //     console.log("Per Day Charges: ", perDayCharges);
+
+  //     let finalRateForFourSeater;
+  //     let finalRateForSixSeater;
+
+  //     // Apply original redundant logic
+  //     if (inputKM > perDayCharges) {
+  //       const finalKM1_for_four_seater = inputKM * 12;
+  //       const finalKM1_for_six_seater = inputKM * 16;
+  //       const nights = numberOfDays - 1;
+  //       const nightCharges = nights * 500;
+  //       console.log("Night Charges (inputKM > perDayCharges): ", nightCharges);
+
+  //       finalRateForFourSeater = finalKM1_for_four_seater + nightCharges;
+  //       finalRateForSixSeater = finalKM1_for_six_seater + nightCharges;
+  //     } else {
+  //       const finalKM2_for_four_seater = perDayCharges * 12;
+  //       const finalKM2_for_six_seater = perDayCharges * 16;
+  //       const nights = numberOfDays - 1;
+  //       const nightCharges = nights * 500;
+  //       console.log("Night Charges (perDayCharges >= inputKM): ", nightCharges);
+
+  //       finalRateForFourSeater = finalKM2_for_four_seater + nightCharges;
+  //       finalRateForSixSeater = finalKM2_for_six_seater + nightCharges;
+  //     }
+
+  //     console.log("Final Rate for Four Seater: ", finalRateForFourSeater);
+  //     console.log("Final Rate for Six Seater: ", finalRateForSixSeater);
+
+  //     // Update state
+  //     setFourSeater(finalRateForFourSeater);
+  //     setSixSeater(finalRateForSixSeater);
+
+  //     return {
+  //       fourSeater: finalRateForFourSeater,
+  //       sixSeater: finalRateForSixSeater,
+  //       distance,
+  //     };
+  //   } catch (error) {
+  //     console.error("Error calculating price:", error);
+  //     toast.error("An error occurred while calculating the price.");
+  //     return { fourSeater: 0, sixSeater: 0, distance: 0 };
+  //   }
+  // };
+
   const calculatingPrice = async () => {
     try {
       const distance = await fetchDistance(
@@ -341,11 +424,12 @@ export default function VendorRoundTripContent() {
         return { fourSeater: 0, sixSeater: 0, distance: 0 };
       }
 
-      // Calculate number of days here
-      const pickupDate = new Date(roundTrip.pickup_date_time);
-      const returnDate = new Date(roundTrip.return_date_time);
-      const timeDifference = returnDate.getTime() - pickupDate.getTime();
-      const numberOfDays = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+      // Calculate number of days using date-fns
+      const numberOfDays = differenceInCalendarDays(
+        parseISO(roundTrip.return_date_time),
+        parseISO(roundTrip.pickup_date_time)
+      ) || 1;
+
       console.log("Calculated Number of Days: ", numberOfDays);
 
       const inputKM = distance * 2; // Round trip distance
@@ -358,12 +442,13 @@ export default function VendorRoundTripContent() {
       let finalRateForFourSeater;
       let finalRateForSixSeater;
 
-      // Apply original redundant logic
+      const nights = numberOfDays - 1;
+      const nightCharges = nights * 500;
+
       if (inputKM > perDayCharges) {
         const finalKM1_for_four_seater = inputKM * 12;
         const finalKM1_for_six_seater = inputKM * 16;
-        const nights = numberOfDays - 1;
-        const nightCharges = nights * 500;
+
         console.log("Night Charges (inputKM > perDayCharges): ", nightCharges);
 
         finalRateForFourSeater = finalKM1_for_four_seater + nightCharges;
@@ -371,8 +456,7 @@ export default function VendorRoundTripContent() {
       } else {
         const finalKM2_for_four_seater = perDayCharges * 12;
         const finalKM2_for_six_seater = perDayCharges * 16;
-        const nights = numberOfDays - 1;
-        const nightCharges = nights * 500;
+
         console.log("Night Charges (perDayCharges >= inputKM): ", nightCharges);
 
         finalRateForFourSeater = finalKM2_for_four_seater + nightCharges;
@@ -382,7 +466,6 @@ export default function VendorRoundTripContent() {
       console.log("Final Rate for Four Seater: ", finalRateForFourSeater);
       console.log("Final Rate for Six Seater: ", finalRateForSixSeater);
 
-      // Update state
       setFourSeater(finalRateForFourSeater);
       setSixSeater(finalRateForSixSeater);
 
@@ -397,6 +480,7 @@ export default function VendorRoundTripContent() {
       return { fourSeater: 0, sixSeater: 0, distance: 0 };
     }
   };
+
 
   const handlePhaseOne = async (e) => {
     e.preventDefault();
@@ -416,39 +500,32 @@ export default function VendorRoundTripContent() {
 
     const { pickup_date_time, return_date_time } = roundTrip;
 
-    const pickupDate = new Date(pickup_date_time);
-    const returnDate = new Date(return_date_time);
+    const pickupDate = parseISO(pickup_date_time);
+    const returnDate = parseISO(return_date_time);
     const currentDate = new Date();
 
-    if (pickupDate < currentDate) {
-      toast.error(
-        "Pickup date and time must be from the present day or later."
-      );
+    if (isBefore(pickupDate, currentDate)) {
+      toast.error("Pickup date and time must be from the present day or later.");
       return;
     }
 
-    if (returnDate < pickupDate) {
+    if (isBefore(returnDate, pickupDate)) {
       toast.error("Return date & time cannot be before the pickup date.");
       return;
     }
 
-    const timeDifference = returnDate.getTime() - pickupDate.getTime();
-    const numberOfDays = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+    const numberOfDays = differenceInCalendarDays(returnDate, pickupDate) || 1; // Minimum 1 day
 
-    // Log numberOfDays to check its value
     console.log("Calculated Number of Days: ", numberOfDays);
 
-    // Set the no_of_days in the roundTrip object
     const updatedRoundTrip = {
       ...roundTrip,
       no_of_days: numberOfDays,
       vid, // Include vid directly here
     };
 
-    // Calculate prices
     const { fourSeater, sixSeater, distance } = await calculatingPrice();
 
-    // Navigate with updatedRoundTrip
     navigate(`/vendor/car-type-selection?uid=${uid}`, {
       state: {
         fourSeater,
@@ -458,7 +535,6 @@ export default function VendorRoundTripContent() {
       },
     });
 
-    // Log the updated roundTrip
     console.log("Round Trip after update: ", updatedRoundTrip);
   };
 
@@ -517,6 +593,27 @@ export default function VendorRoundTripContent() {
                     setRoundTrip({
                       ...roundTrip,
                       passenger_name: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <input type="hidden" name="vid" value={vid} />
+                <label className="flex items-center text-lg font-semibold text-gray-700">
+                  <User className="mr-2 h-5 w-5 text-blue-500" />
+                  Passenger Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter passenger email"
+                  className="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  value={roundTrip.passenger_email}
+                  onChange={(e) =>
+                    setRoundTrip({
+                      ...roundTrip,
+                      passenger_email: e.target.value,
                     })
                   }
                 />

@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, MapPin, Calendar, User, Phone } from "lucide-react";
+import { ArrowRight, MapPin, Calendar, User, Phone, Mail } from "lucide-react";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import toast from "react-hot-toast";
+import { isFuture, parseISO } from "date-fns";
 
 export default function VendorOneWayTripContent() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function VendorOneWayTripContent() {
     pickup_date_time: "",
     passenger_name: "",
     passenger_phone: "",
+    passenger_email: "",
   });
 
   // Fetch Passenger ID (VID)
@@ -174,9 +176,9 @@ export default function VendorOneWayTripContent() {
         const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos((lat1 * Math.PI) / 180) *
-            Math.cos((lat2 * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distance = R * c; // Distance in km
         return distance;
@@ -351,6 +353,16 @@ export default function VendorOneWayTripContent() {
     };
   };
 
+  // Validate and format the pickup date and time
+  const validatePickupDateTime = (pickupDateTime) => {
+    const parsedDate = parseISO(pickupDateTime); // Parse the ISO string into a Date object
+    if (!isFuture(parsedDate)) {
+      toast.error("Pickup date and time must be in the future.");
+      return false;
+    }
+    return true;
+  };
+
   const handlePhaseOne = async (e) => {
     e.preventDefault();
 
@@ -367,14 +379,10 @@ export default function VendorOneWayTripContent() {
       return;
     }
 
-    const now = new Date();
-    const pickupDateTime = new Date(oneWayTrip.pickup_date_time);
-
-    if (pickupDateTime <= now) {
-      toast.error("Pickup date and time must be in the future.");
+    // Validate pickup date and time
+    if (!validatePickupDateTime(oneWayTrip.pickup_date_time)) {
       return;
     }
-
     const { fourSeater, sixSeater, distance } = await calculatingPrice();
 
     if (distance === 0) return;
@@ -468,6 +476,27 @@ export default function VendorOneWayTripContent() {
                     })
                   }
                   pattern="[0-9]{10}"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-lg font-semibold text-gray-700">
+                  <Mail className="mr-2 h-5 w-5 text-blue-500" />
+                  Passenger Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  value={oneWayTrip.passenger_email}
+                  onChange={(e) =>
+                    setOneWayTrip({
+                      ...oneWayTrip,
+                      passenger_email: e.target.value,
+                    })
+                  }
+
                 />
               </div>
 

@@ -50,6 +50,24 @@
   }
 }
 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Bree Serif", serif;
+  letter-spacing: 1px;
+  scroll-behavior: smooth;
+}
+
 /* Additional styles for the 3D loader */
 .perspective-effect {
   transform: perspective(1000px) rotateX(60deg);
@@ -101,24 +119,6 @@
 /* For dark mode transitions */
 .dark {
   transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Bree Serif", serif;
-  letter-spacing: 1px;
-  scroll-behavior: smooth;
 }
 
 /* 
