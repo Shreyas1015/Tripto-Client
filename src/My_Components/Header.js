@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import secureLocalStorage from "react-secure-storage";
 import axiosInstance from "../API/axiosInstance";
+import DarkModeToggle from "./DarkModeToggle";
 
 const Header = () => {
   const [profileData, setProfileData] = useState({}); // use empty object to avoid undefined errors
@@ -28,10 +29,15 @@ const Header = () => {
 
   return (
     <header>
-      <h5 className="text-lg font-semibold">
-        Hello {profileData?.name ? profileData.name : "Guest"}!!
-      </h5>
-      <h1 className="text-3xl font-bold mt-2">Welcome Back</h1>
+      <div className="flex justify-between items-start">
+        <div>
+          <h5 className="text-lg font-semibold">
+            Hello {profileData?.name ? profileData.name : "Guest"}!!
+          </h5>
+          <h1 className="text-3xl font-bold mt-2">Welcome Back</h1>
+        </div>
+        <DarkModeToggle />
+      </div>
       <hr className="my-4 border-black/50" />
     </header>
   );
