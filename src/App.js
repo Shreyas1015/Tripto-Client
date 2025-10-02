@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import SignUpPage from "./Pages/SignUpPage";
+import { ThemeProvider } from "./context/ThemeContext";
 import PassengerDashboard from "./Pages/Passengers/PassengerDashboard";
 import PassengerHomePage from "./Pages/Passengers/PassengerHomePage";
 import PassenegerProfile from "./Pages/Passengers/PassengerProfile";
@@ -16,12 +17,12 @@ import BookingDetailsPage from "./Pages/Drivers/BookingDetailsPage";
 import PassengerCarTpeSelectionPage from "./Pages/Passengers/PassengerCarTypeSelectionPage";
 import axiosInstance from "./API/axiosInstance";
 import Loading from "./My_Components/Loading";
-import toast from "react-hot-toast";
+//import toast from "react-hot-toast";
 import BusinessStatsPage from "./Pages/Admin/BusinessStatsPage";
 import AdminDriverVerificationPage from "./Pages/Admin/AdminDriverVerificationPage";
 import VendorDashboard from "./Pages/Vendors/VendorsDashboard";
 import VendorsProfilePage from "./Pages/Vendors/VendorsProfilePage";
-import VendorsTripBookingPage from "./Pages/Vendors/VendorsTripBookingPage";
+//import VendorsTripBookingPage from "./Pages/Vendors/VendorsTripBookingPage";
 import AdminPassengerDetailsPage from "./Pages/Admin/AdminPassengerDetailsPage";
 import VendorTripSelectionPage from "./Pages/Vendors/VendorTripSelectionPage";
 import VendorRoundTripPage from "./Pages/Vendors/VendorRoundTripPage";
@@ -42,6 +43,8 @@ import AdminTripStatisticsPage from "./Pages/Admin/AdminTripStatisticsPage";
 
 const App = () => {
   const [loading, setLoading] = useState(false);
+  //const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
+
   useEffect(() => {
     const requestInterceptor = axiosInstance.interceptors.request.use(
       (config) => {
@@ -80,7 +83,7 @@ const App = () => {
   }, []);
 
   return (
-    <>
+    <ThemeProvider>
       <Router>
         <Loading show={loading} />
         <Routes>
@@ -192,7 +195,7 @@ const App = () => {
           </>
         </Routes>
       </Router>
-    </>
+    </ThemeProvider>
   );
 };
 
