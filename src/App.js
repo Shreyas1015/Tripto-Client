@@ -197,3 +197,15 @@ const App = () => {
 };
 
 export default App;
+
+import useOnlineStatus from './hooks/useOnlineStatus';
+
+function App() {
+  const online = useOnlineStatus();
+  return (
+    <>
+      {!online && <div className="offline-banner">Offline mode — showing cached data</div>}
+      {/* rest of your app */}
+    </>
+  );
+}
