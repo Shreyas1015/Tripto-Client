@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import ImageOptimizer from "../My_Components/ImageOptimizer";
 
 const ResetPass = () => {
   const location = useLocation();
@@ -61,11 +62,11 @@ const ResetPass = () => {
     <div className="container-fluid">
       <div className="row">
         <div className="col-lg-6 m-0 p-0">
-          <img
+          <ImageOptimizer
             className="img-fluid"
             style={{ height: "100vh", objectFit: "cover" }}
             src="/Images/Logo1.png"
-            alt=""
+            alt="Logo"
           />
         </div>
         <div className="col-lg-6 m-0 p-0">

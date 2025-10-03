@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import ImageOptimizer from "../ImageOptimizer";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import toast from "react-hot-toast";
@@ -73,7 +74,7 @@ const BookingDetailsContent = () => {
         <div className="bookings">
           <form onSubmit={handleSubmit}>
             <div className="card my-3 mx-auto" style={{ width: "40rem" }}>
-              <img
+              <ImageOptimizer
                 src="/Images/2-Cars.png"
                 className="card-img-top"
                 alt="Booking"

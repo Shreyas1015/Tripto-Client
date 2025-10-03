@@ -123,6 +123,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import { toast } from "react-hot-toast";
+import LazyImage from "../LazyImage";
 import {
   User,
   Plane,
@@ -287,7 +288,7 @@ const Navbar = ({ handleTrigger }) => {
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center space-x-2 focus:outline-none"
               >
-                <img
+                <LazyImage
                   className="h-8 w-8 rounded-full object-cover"
                   src={updatedProfileIMG}
                   alt="Profile"
@@ -352,7 +353,7 @@ const Sidebar = ({ isOpen, handleTrigger, handleLogout }) => {
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <Link to="/" className="flex items-center space-x-3">
-                <img
+                <LazyImage
                   src="/path-to-your-logo.png"
                   alt="Tripto"
                   className="h-8 w-auto"
