@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import LazyImage from "../My_Components/LazyImage";
 
 const ForgetPass = () => {
   const navigate = useNavigate();
@@ -37,11 +38,12 @@ const ForgetPass = () => {
     <div className="container-fluid">
       <div className="row">
         <div className="col-lg-6 m-0 p-0">
-          <img
+          <LazyImage
             className="img-fluid"
             style={{ height: "100vh", objectFit: "cover" }}
             src="/Images/Logo1.png"
             alt=""
+            effect="blur"
           />
         </div>
         <div className="col-lg-6 m-0 p-0">

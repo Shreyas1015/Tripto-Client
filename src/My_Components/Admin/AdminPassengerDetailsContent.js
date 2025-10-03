@@ -25,6 +25,7 @@ import {
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import toast from "react-hot-toast";
+import LazyImage from '../../My_Components/ImageOptimizer';
 
 const AdminPassengerDashboard = () => {
   const [passengers, setPassengers] = useState([]);
@@ -391,11 +392,11 @@ const AdminPassengerDashboard = () => {
             <Settings size={20} className="text-gray-600" />
           </button>
           <div className="flex items-center space-x-2">
-            <img
+            <LazyImage
               src="https://i.pravatar.cc/150?img=68"
               alt="Admin"
               className="w-8 h-8 rounded-full"
-            />
+             effect="blur" />
             <span className="text-sm font-medium text-gray-700">Admin</span>
           </div>
         </div>
@@ -715,14 +716,14 @@ const AdminPassengerDashboard = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
-                              <img
+                              <LazyImage
                                 className="h-10 w-10 rounded-full"
                                 src={
                                   passenger.profile_img ||
                                   "/placeholder.svg?height=40&width=40"
                                 }
                                 alt=""
-                              />
+                               effect="blur" />
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">
@@ -916,7 +917,7 @@ const AdminPassengerDashboard = () => {
                         {/* Left Column - Basic Info */}
                         <div className="bg-gray-50 p-4 rounded-lg">
                           <div className="flex flex-col items-center mb-4">
-                            <img
+                            <LazyImage
                               src={
                                 selectedPassenger.profile_img ||
                                 "/placeholder.svg?height=96&width=96" ||
@@ -924,7 +925,7 @@ const AdminPassengerDashboard = () => {
                               }
                               alt={selectedPassenger.name || "Passenger"}
                               className="w-24 h-24 rounded-full mb-3 object-cover"
-                            />
+                             effect="blur" />
                             <h4 className="text-xl font-semibold">
                               {selectedPassenger.name || "Unknown Name"}
                             </h4>

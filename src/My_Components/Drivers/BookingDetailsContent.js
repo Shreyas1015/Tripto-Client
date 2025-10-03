@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import toast from "react-hot-toast";
+import LazyImage from "../LazyImage";
 
 const BookingDetailsContent = () => {
   const navigate = useNavigate();
@@ -73,11 +74,12 @@ const BookingDetailsContent = () => {
         <div className="bookings">
           <form onSubmit={handleSubmit}>
             <div className="card my-3 mx-auto" style={{ width: "40rem" }}>
-              <img
-                src="/Images/2-Cars.png"
-                className="card-img-top"
-                alt="Booking"
-              />
+              <LazyImage
+                  src="/Images/2-Cars.png"
+                  className="card-img-top"
+                  alt="Booking"
+                  effect="blur"
+                />
               <div className="card-body">
                 <h5 className="card-title">
                   {bookingsData.trip_type === 1 ? "One Way Trip" : "Round Trip"}

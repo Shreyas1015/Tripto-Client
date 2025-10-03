@@ -27,6 +27,7 @@ import {
 import axiosInstance from "../../API/axiosInstance"
 import secureLocalStorage from "react-secure-storage"
 import toast from "react-hot-toast"
+import LazyImage from '../../My_Components/ImageOptimizer';
 
 export default function RateDriver() {
   const location = useLocation()
@@ -276,11 +277,11 @@ export default function RateDriver() {
                   <div className="flex items-center">
                     <div className="w-12 h-12 rounded-full bg-gray-200 mr-4 overflow-hidden flex-shrink-0">
                       {rideDetails.driverPhoto ? (
-                        <img
+                        <LazyImage
                           src={rideDetails.driverPhoto || "/placeholder.svg"}
                           alt={rideDetails.driverName || "Driver"}
                           className="w-full h-full object-cover"
-                        />
+                         effect="blur" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-[#0bbfe0] text-white text-xl font-bold">
                           {(rideDetails.driverName || "D").charAt(0)}

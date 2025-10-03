@@ -244,11 +244,11 @@
 //           <hr />
 //           <div className="row my-5">
 //             <div className="col-lg-3 border-end border-dark border-2 text-center">
-//               <img
+//               <LazyImage
 //                 className="img-fluid profile-img"
 //                 src={updatedProfileIMG}
 //                 alt="Not available"
-//               />
+//                effect="blur" />
 //               <form onSubmit={handleProfileImg}>
 //                 <input type="hidden" name="uid" value={decryptedUID} />
 //                 <div className="input-group me-5 py-3">
@@ -1251,6 +1251,7 @@ import secureLocalStorage from "react-secure-storage";
 import { IKContext, IKUpload } from "imagekitio-react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import LazyImage from '../../My_Components/ImageOptimizer';
 
 const VendorProfileContent = () => {
   const navigate = useNavigate();
@@ -1677,11 +1678,11 @@ const VendorProfileContent = () => {
           </div>
           <div className="mt-4 md:mt-0 flex items-center gap-3">
             {docsView.profilePhoto ? (
-              <img
+              <LazyImage
                 src={docsView.profilePhoto || "/placeholder.svg"}
                 alt="Profile"
                 className="w-16 h-16 rounded-full border-2 border-white object-cover"
-              />
+               effect="blur" />
             ) : (
               <div className="w-16 h-16 rounded-full bg-[#00a6b0] flex items-center justify-center">
                 <User className="w-8 h-8 text-white" />

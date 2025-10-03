@@ -30,6 +30,7 @@ import {
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import toast from "react-hot-toast";
+import LazyImage from '../../My_Components/ImageOptimizer';
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -891,11 +892,11 @@ const AdminVendorFleetOverview = () => {
                       <div key={vendor.vid} className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                           {vendor.profilePhoto ? (
-                            <img
+                            <LazyImage
                               src={vendor.profilePhoto || "/placeholder.svg"}
                               alt={vendor.name}
                               className="h-10 w-10 rounded-full object-cover"
-                            />
+                             effect="blur" />
                           ) : (
                             <span className="text-gray-500 font-medium">
                               {index + 1}
@@ -1034,14 +1035,14 @@ const AdminVendorFleetOverview = () => {
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                                 {transaction.vendor_profile ? (
-                                  <img
+                                  <LazyImage
                                     src={
                                       transaction.vendor_profile ||
                                       "/placeholder.svg"
                                     }
                                     alt={transaction.vendor_name}
                                     className="h-8 w-8 rounded-full object-cover"
-                                  />
+                                   effect="blur" />
                                 ) : (
                                   <Users className="h-4 w-4 text-gray-500" />
                                 )}
@@ -1257,13 +1258,13 @@ const AdminVendorFleetOverview = () => {
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                                 {vendor.profilePhoto ? (
-                                  <img
+                                  <LazyImage
                                     src={
                                       vendor.profilePhoto || "/placeholder.svg"
                                     }
                                     alt={vendor.name}
                                     className="h-10 w-10 rounded-full object-cover"
-                                  />
+                                   effect="blur" />
                                 ) : (
                                   <Users className="h-5 w-5 text-gray-500" />
                                 )}

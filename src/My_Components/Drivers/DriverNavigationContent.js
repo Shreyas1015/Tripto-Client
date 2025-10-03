@@ -283,11 +283,11 @@
 //           <div className="flex items-center mb-6">
 //             <div className="w-16 h-16 rounded-full bg-gray-200 mr-4 overflow-hidden">
 //               {rideDetails.passengerPhoto ? (
-//                 <img
+//                 <LazyImage
 //                   src={rideDetails.passengerPhoto || "/placeholder.svg"}
 //                   alt={rideDetails.passengerName || "Passenger"}
 //                   className="w-full h-full object-cover"
-//                 />
+//                  effect="blur" />
 //               ) : (
 //                 <div className="w-full h-full flex items-center justify-center bg-[#0bbfe0] text-white text-2xl font-bold">
 //                   {(rideDetails.passengerName || "P").charAt(0)}
@@ -539,6 +539,7 @@ import {
 import axiosInstance from "../../API/axiosInstance"
 import secureLocalStorage from "react-secure-storage"
 import toast from "react-hot-toast"
+import LazyImage from '../../My_Components/ImageOptimizer';
 
 export default function DriverNavigation() {
   const location = useLocation()
@@ -878,10 +879,11 @@ export default function DriverNavigation() {
           <div className="flex items-center mb-6">
             <div className="w-16 h-16 rounded-full bg-gray-200 mr-4 overflow-hidden">
               {rideDetails.passengerPhoto ? (
-                <img
+                <LazyImage
                   src={rideDetails.passengerPhoto || "/placeholder.svg"}
                   alt={rideDetails.passengerName || "Passenger"}
                   className="w-full h-full object-cover"
+                  effect="blur"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-[#0bbfe0] text-white text-2xl font-bold">

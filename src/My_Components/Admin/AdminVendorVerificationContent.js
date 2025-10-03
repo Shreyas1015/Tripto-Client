@@ -15,6 +15,7 @@ import {
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import toast from "react-hot-toast";
+import LazyImage from '../../My_Components/ImageOptimizer';
 
 const DocumentCard = ({ document, onApprove, onReject, onView, newUpload }) => {
   return (
@@ -33,11 +34,11 @@ const DocumentCard = ({ document, onApprove, onReject, onView, newUpload }) => {
         )}
         <h3 className="text-lg font-semibold mb-2">{document.title}</h3>
         {document.url ? (
-          <img
+          <LazyImage
             src={document.url || "/placeholder.svg"}
             alt={document.title}
             className="w-full h-80 mb-3 rounded-lg object-cover"
-          />
+           effect="blur" />
         ) : (
           <p className="text-gray-500 mb-3">No document uploaded.</p>
         )}
@@ -287,11 +288,11 @@ const VendorDocuments = ({ vendorId, onBackToList }) => {
         <div className="flex items-center space-x-4">
           <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
             {vendorData[0].profilePhoto ? (
-              <img
+              <LazyImage
                 src={vendorData[0].profilePhoto || "/placeholder.svg"}
                 alt={vendorData[0].name}
                 className="h-full w-full object-cover"
-              />
+               effect="blur" />
             ) : (
               <User className="h-6 w-6 text-gray-500" />
             )}
@@ -411,11 +412,11 @@ const VendorDocuments = ({ vendorId, onBackToList }) => {
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <img
+            <LazyImage
               src={viewingDocument || "/placeholder.svg"}
               alt="Document"
               className="w-full h-auto rounded-md"
-            />
+             effect="blur" />
             <div className="mt-4 flex justify-end">
               <button
                 className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md transition-colors"
@@ -599,11 +600,11 @@ const AdminVendorVerification = () => {
                         <td className="p-4 flex items-center space-x-3">
                           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                             {vendor.profilePhoto ? (
-                              <img
+                              <LazyImage
                                 src={vendor.profilePhoto || "/placeholder.svg"}
                                 alt={vendor.name}
                                 className="h-full w-full object-cover"
-                              />
+                               effect="blur" />
                             ) : (
                               <User className="h-5 w-5 text-gray-500" />
                             )}

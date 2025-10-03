@@ -18,11 +18,11 @@
 //     <div className="border rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg">
 //       <div className="p-4">
 //         <div className="aspect-video relative mb-4">
-//           <img
+//           <LazyImage
 //             src={document.file}
 //             alt={document.title}
 //             className="object-cover w-full h-full rounded-md"
-//           />
+//            effect="blur" />
 //           <span
 //             className={`absolute top-2 right-2 px-2 py-1 rounded-md text-white ${
 //               document.status === "Approved"
@@ -119,11 +119,11 @@
 //     <ArrowLeft className="w-4 h-4 mr-2" /> Back to Driver List
 //   </button>
 //   <div className="flex items-center space-x-4">
-//     <img
+//     <LazyImage
 //       src={driver.avatar}
 //       alt={driver.name}
 //       className="h-12 w-12 rounded-full object-cover"
-//     />
+//      effect="blur" />
 //     <div>
 //       <h2 className="text-2xl font-bold">{driver.name}</h2>
 //       <span
@@ -182,11 +182,11 @@
 //         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
 //           <div className="bg-white p-6 rounded-lg max-w-3xl w-full">
 //             <h3 className="text-xl font-bold mb-4">{viewingDocument.title}</h3>
-//             <img
+//             <LazyImage
 //               src={viewingDocument.file}
 //               alt={viewingDocument.title}
 //               className="aspect-video object-contain w-full"
-//             />
+//              effect="blur" />
 //             {viewingDocument.status === "Rejected" && (
 //               <div className="mt-4 p-4 bg-red-100 rounded-md">
 //                 <h4 className="font-semibold flex items-center">
@@ -313,11 +313,11 @@
 //                     <td className="p-4 flex items-center space-x-3">
 //                       <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
 //                         {driver.avatar ? (
-//                           <img
+//                           <LazyImage
 //                             src={driver.profile_img}
 //                             alt={driver.name}
 //                             className="h-10 w-10 rounded-full object-cover"
-//                           />
+//                            effect="blur" />
 //                         ) : (
 //                           <User className="h-5 w-5 text-gray-500" />
 //                         )}
@@ -374,6 +374,7 @@ import {
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import toast from "react-hot-toast";
+import LazyImage from '../../My_Components/ImageOptimizer';
 
 const DocumentCard = ({ document, onApprove, onReject, onView, newUpload }) => {
   return (
@@ -392,11 +393,11 @@ const DocumentCard = ({ document, onApprove, onReject, onView, newUpload }) => {
         )}
         <h3 className="text-lg font-semibold mb-2">{document.title}</h3>
         {document.url ? (
-          <img
+          <LazyImage
             src={document.url}
             alt={document.title}
             className="w-full h-80 mb-3 rounded-lg object-cover"
-          />
+           effect="blur" />
         ) : (
           <p className="text-gray-500 mb-3">No document uploaded.</p>
         )}
@@ -751,11 +752,11 @@ const DriverDocuments = ({ driverId, onBackToList }) => {
       {isViewModalOpen && viewingDocument && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg max-w-xl w-full max-h-full overflow-y-auto">
-            <img
+            <LazyImage
               src={viewingDocument}
               alt="Document"
               className="w-full h-auto rounded-md"
-            />
+             effect="blur" />
             <button
               className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md"
               onClick={() => setIsViewModalOpen(false)}

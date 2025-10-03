@@ -330,11 +330,11 @@
 //                   whileHover={{ scale: 1.05 }}
 //                   className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0bbfe0] shadow-lg"
 //                 >
-//                   <img
+//                   <LazyImage
 //                     className="w-full h-full object-cover"
 //                     src={updatedProfileIMG || "https://via.placeholder.com/150?text=Profile"}
 //                     alt="Profile"
-//                   />
+//                    effect="blur" />
 //                 </motion.div>
 //                 {isEditing && (
 //                   <motion.div
@@ -713,6 +713,7 @@ import { useNavigate } from "react-router-dom"
 import axiosInstance from "../../API/axiosInstance"
 import secureLocalStorage from "react-secure-storage"
 import { toast, Toaster } from "react-hot-toast"
+import LazyImage from '../../My_Components/ImageOptimizer';
 import {
   User,
   Mail,
@@ -972,11 +973,11 @@ const PassengerProfileContent = () => {
             <div className="relative mr-6">
               <div className="h-24 w-24 rounded-full bg-white/20 backdrop-blur-sm overflow-hidden border-4 border-white/30">
                 {updatedProfileIMG ? (
-                  <img
+                  <LazyImage
                     src={updatedProfileIMG || "/placeholder.svg"}
                     alt="Profile"
                     className="h-full w-full object-cover"
-                  />
+                   effect="blur" />
                 ) : (
                   <div className="h-full w-full flex items-center justify-center bg-[#0bbfe0] text-white text-3xl font-bold">
                     {updatedProfileData.name ? updatedProfileData.name.charAt(0).toUpperCase() : "P"}

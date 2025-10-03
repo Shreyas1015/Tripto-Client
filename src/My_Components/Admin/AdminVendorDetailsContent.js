@@ -38,6 +38,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import LazyImage from '../../My_Components/ImageOptimizer';
 
 // Vendor status mapping
 const vendorStatusMap = {
@@ -891,13 +892,13 @@ export default function AdminVendorDashboard() {
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
                                 {vendor.profilePhoto ? (
-                                  <img
+                                  <LazyImage
                                     src={
                                       vendor.profilePhoto || "/placeholder.svg"
                                     }
                                     alt={vendor.name || "Vendor"}
                                     className="h-full w-full object-cover"
-                                  />
+                                   effect="blur" />
                                 ) : (
                                   <User className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                                 )}
@@ -1347,13 +1348,13 @@ export default function AdminVendorDashboard() {
                   <div className="w-full md:w-1/3 flex flex-col items-center">
                     <div className="h-32 w-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden mb-4">
                       {selectedVendor.profilePhoto ? (
-                        <img
+                        <LazyImage
                           src={
                             selectedVendor.profilePhoto || "/placeholder.svg"
                           }
                           alt={selectedVendor.name || "Vendor"}
                           className="h-full w-full object-cover"
-                        />
+                         effect="blur" />
                       ) : (
                         <User className="h-16 w-16 text-gray-500 dark:text-gray-400" />
                       )}
