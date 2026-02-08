@@ -347,6 +347,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../API/axiosInstance";
+import olaAxiosInstance from "../../API/olaAxiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import { ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
@@ -379,7 +380,7 @@ export default function PassengerRoundTripContent() {
       try {
         const res = await axiosInstance.post(
           `${process.env.REACT_APP_BASE_URL}/passengers/fetchPID`,
-          { decryptedUID }
+          { decryptedUID },
         );
         setPid(res.data);
       } catch (error) {
@@ -454,9 +455,9 @@ export default function PassengerRoundTripContent() {
     if (query.length < 3) return;
 
     try {
-      const response = await axiosInstance.get(
+      const response = await olaAxiosInstance.get(
         `https://api.olamaps.io/places/v1/autocomplete?input=${query}&api_key=${process.env.REACT_APP_OLA_API_KEY}`,
-        { skipLoading: true }
+        { skipLoading: true },
       );
 
       const predictions = response.data.predictions || [];
@@ -475,7 +476,7 @@ export default function PassengerRoundTripContent() {
       // Check if the address is already in lat/lng format
       const isLatLng =
         /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(\d{1,3}(\.\d+)?|\d(\.\d+)?)/.test(
-          address
+          address,
         );
 
       if (isLatLng) {
@@ -490,7 +491,7 @@ export default function PassengerRoundTripContent() {
       const encodedAddress = encodeURIComponent(address);
       const geocodeUrl = `https://api.olamaps.io/places/v1/geocode?address=${encodedAddress}&language=hi&api_key=${process.env.REACT_APP_OLA_API_KEY}`;
 
-      const response = await axiosInstance.get(geocodeUrl);
+      const response = await olaAxiosInstance.get(geocodeUrl);
       const geocodingResults = response.data.geocodingResults;
 
       if (!geocodingResults || geocodingResults.length === 0) {
@@ -532,7 +533,7 @@ export default function PassengerRoundTripContent() {
           originalCoordinates.lat,
           originalCoordinates.lng,
           resultCoordinates.lat,
-          resultCoordinates.lng
+          resultCoordinates.lng,
         );
 
         // Keep track of the closest match
@@ -559,7 +560,7 @@ export default function PassengerRoundTripContent() {
       // Check if the address is already in lat/lng format
       const isLatLng =
         /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(\d{1,3}(\.\d+)?|\d(\.\d+)?)/.test(
-          address
+          address,
         );
 
       if (isLatLng) {
@@ -573,14 +574,14 @@ export default function PassengerRoundTripContent() {
       const encodedAddress = encodeURIComponent(address);
       const geocodeUrl = `https://api.olamaps.io/places/v1/geocode?address=${encodedAddress}&language=hi&api_key=${process.env.REACT_APP_OLA_API_KEY}`;
 
-      const response = await axiosInstance.get(geocodeUrl);
+      const response = await olaAxiosInstance.get(geocodeUrl);
       const geocodingResults = response.data.geocodingResults;
 
       if (geocodingResults && geocodingResults.length > 0) {
         return geocodingResults[0].geometry.location;
       } else {
         console.error(
-          "Could not retrieve coordinates for the original address."
+          "Could not retrieve coordinates for the original address.",
         );
         return null;
       }
@@ -595,11 +596,11 @@ export default function PassengerRoundTripContent() {
       // Check if the pickup and drop locations are already in lat/lng format
       const isPickupLatLng =
         /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(\d{1,3}(\.\d+)?|\d(\.\d+)?)/.test(
-          pickupLocation
+          pickupLocation,
         );
       const isDropLatLng =
         /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(\d{1,3}(\.\d+)?|\d(\.\d+)?)/.test(
-          dropLocation
+          dropLocation,
         );
 
       let pickupCoords, dropCoords;
@@ -630,7 +631,7 @@ export default function PassengerRoundTripContent() {
 
       if (!pickupCoords || !dropCoords) {
         console.error(
-          "Unable to retrieve coordinates for one or both locations."
+          "Unable to retrieve coordinates for one or both locations.",
         );
         return 0; // If geocoding fails, return 0
       }
@@ -639,8 +640,8 @@ export default function PassengerRoundTripContent() {
       const { lat: dropLat, lng: dropLng } = dropCoords;
 
       // Fetch distance from the API using the geocoded coordinates
-      const response = await axiosInstance.get(
-        `https://api.olamaps.io/routing/v1/distanceMatrix?origins=${pickupLat},${pickupLng}&destinations=${dropLat},${dropLng}&api_key=${process.env.REACT_APP_OLA_API_KEY}`
+      const response = await olaAxiosInstance.get(
+        `https://api.olamaps.io/routing/v1/distanceMatrix?origins=${pickupLat},${pickupLng}&destinations=${dropLat},${dropLng}&api_key=${process.env.REACT_APP_OLA_API_KEY}`,
       );
 
       // Debugging: Log the full API response to inspect the data structure
@@ -713,7 +714,7 @@ export default function PassengerRoundTripContent() {
     try {
       const distance = await fetchDistance(
         roundTrip.pickup_location,
-        roundTrip.drop_location
+        roundTrip.drop_location,
       );
 
       console.log("Fetched Distance: ", distance);
@@ -722,7 +723,7 @@ export default function PassengerRoundTripContent() {
       if (!distance || distance <= 0) {
         console.log("Distance is invalid or zero. Unable to calculate price.");
         toast.error(
-          "Unable to calculate price due to missing or invalid distance."
+          "Unable to calculate price due to missing or invalid distance.",
         );
         return { fourSeater: 0, sixSeater: 0, distance: 0 };
       }
@@ -794,7 +795,7 @@ export default function PassengerRoundTripContent() {
 
     if (pickupDate < currentDate) {
       toast.error(
-        "Pickup date and time must be from the present day or later."
+        "Pickup date and time must be from the present day or later.",
       );
       return;
     }

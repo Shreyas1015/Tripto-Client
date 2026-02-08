@@ -2,10 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../API/axiosInstance";
+import olaAxiosInstance from "../../API/olaAxiosInstance";
 import secureLocalStorage from "react-secure-storage";
 import { ArrowRight, MapPin, Calendar, User, Phone, Clock } from "lucide-react";
 import toast from "react-hot-toast";
-import { differenceInCalendarDays, differenceInDays, isBefore, isFuture, parseISO } from "date-fns";
+import {
+  differenceInCalendarDays,
+  differenceInDays,
+  isBefore,
+  isFuture,
+  parseISO,
+} from "date-fns";
 
 export default function VendorRoundTripContent() {
   const navigate = useNavigate();
@@ -37,7 +44,7 @@ export default function VendorRoundTripContent() {
       try {
         const res = await axiosInstance.post(
           `${process.env.REACT_APP_BASE_URL}/vendor/fetchVID`,
-          { decryptedUID }
+          { decryptedUID },
         );
         console.log("VID Response: ", res.data);
         setVid(res.data);
@@ -113,9 +120,9 @@ export default function VendorRoundTripContent() {
     if (query.length < 3) return;
 
     try {
-      const response = await axiosInstance.get(
+      const response = await olaAxiosInstance.get(
         `https://api.olamaps.io/places/v1/autocomplete?input=${query}&api_key=${process.env.REACT_APP_OLA_API_KEY}`,
-        { skipLoading: true }
+        { skipLoading: true },
       );
 
       const predictions = response.data.predictions || [];
@@ -134,7 +141,7 @@ export default function VendorRoundTripContent() {
       // Check if the address is already in lat/lng format
       const isLatLng =
         /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(\d{1,3}(\.\d+)?|\d(\.\d+)?)/.test(
-          address
+          address,
         );
 
       if (isLatLng) {
@@ -149,7 +156,7 @@ export default function VendorRoundTripContent() {
       const encodedAddress = encodeURIComponent(address);
       const geocodeUrl = `https://api.olamaps.io/places/v1/geocode?address=${encodedAddress}&language=hi&api_key=${process.env.REACT_APP_OLA_API_KEY}`;
 
-      const response = await axiosInstance.get(geocodeUrl);
+      const response = await olaAxiosInstance.get(geocodeUrl);
       const geocodingResults = response.data.geocodingResults;
 
       if (!geocodingResults || geocodingResults.length === 0) {
@@ -176,9 +183,9 @@ export default function VendorRoundTripContent() {
         const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos((lat1 * Math.PI) / 180) *
-          Math.cos((lat2 * Math.PI) / 180) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distance = R * c; // Distance in km
         return distance;
@@ -191,7 +198,7 @@ export default function VendorRoundTripContent() {
           originalCoordinates.lat,
           originalCoordinates.lng,
           resultCoordinates.lat,
-          resultCoordinates.lng
+          resultCoordinates.lng,
         );
 
         // Keep track of the closest match
@@ -218,7 +225,7 @@ export default function VendorRoundTripContent() {
       // Check if the address is already in lat/lng format
       const isLatLng =
         /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(\d{1,3}(\.\d+)?|\d(\.\d+)?)/.test(
-          address
+          address,
         );
 
       if (isLatLng) {
@@ -232,14 +239,14 @@ export default function VendorRoundTripContent() {
       const encodedAddress = encodeURIComponent(address);
       const geocodeUrl = `https://api.olamaps.io/places/v1/geocode?address=${encodedAddress}&language=hi&api_key=${process.env.REACT_APP_OLA_API_KEY}`;
 
-      const response = await axiosInstance.get(geocodeUrl);
+      const response = await olaAxiosInstance.get(geocodeUrl);
       const geocodingResults = response.data.geocodingResults;
 
       if (geocodingResults && geocodingResults.length > 0) {
         return geocodingResults[0].geometry.location;
       } else {
         console.error(
-          "Could not retrieve coordinates for the original address."
+          "Could not retrieve coordinates for the original address.",
         );
         return null;
       }
@@ -254,11 +261,11 @@ export default function VendorRoundTripContent() {
       // Check if the pickup and drop locations are already in lat/lng format
       const isPickupLatLng =
         /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(\d{1,3}(\.\d+)?|\d(\.\d+)?)/.test(
-          pickupLocation
+          pickupLocation,
         );
       const isDropLatLng =
         /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(\d{1,3}(\.\d+)?|\d(\.\d+)?)/.test(
-          dropLocation
+          dropLocation,
         );
 
       let pickupCoords, dropCoords;
@@ -289,7 +296,7 @@ export default function VendorRoundTripContent() {
 
       if (!pickupCoords || !dropCoords) {
         console.error(
-          "Unable to retrieve coordinates for one or both locations."
+          "Unable to retrieve coordinates for one or both locations.",
         );
         return 0; // If geocoding fails, return 0
       }
@@ -298,8 +305,8 @@ export default function VendorRoundTripContent() {
       const { lat: dropLat, lng: dropLng } = dropCoords;
 
       // Fetch distance from the API using the geocoded coordinates
-      const response = await axiosInstance.get(
-        `https://api.olamaps.io/routing/v1/distanceMatrix?origins=${pickupLat},${pickupLng}&destinations=${dropLat},${dropLng}&api_key=${process.env.REACT_APP_OLA_API_KEY}`
+      const response = await olaAxiosInstance.get(
+        `https://api.olamaps.io/routing/v1/distanceMatrix?origins=${pickupLat},${pickupLng}&destinations=${dropLat},${dropLng}&api_key=${process.env.REACT_APP_OLA_API_KEY}`,
       );
 
       // Debugging: Log the full API response to inspect the data structure
@@ -410,7 +417,7 @@ export default function VendorRoundTripContent() {
     try {
       const distance = await fetchDistance(
         roundTrip.pickup_location,
-        roundTrip.drop_location
+        roundTrip.drop_location,
       );
 
       console.log("Fetched Distance: ", distance);
@@ -419,16 +426,17 @@ export default function VendorRoundTripContent() {
       if (!distance || distance <= 0) {
         console.log("Distance is invalid or zero. Unable to calculate price.");
         toast.error(
-          "Unable to calculate price due to missing or invalid distance."
+          "Unable to calculate price due to missing or invalid distance.",
         );
         return { fourSeater: 0, sixSeater: 0, distance: 0 };
       }
 
       // Calculate number of days using date-fns
-      const numberOfDays = differenceInCalendarDays(
-        parseISO(roundTrip.return_date_time),
-        parseISO(roundTrip.pickup_date_time)
-      ) || 1;
+      const numberOfDays =
+        differenceInCalendarDays(
+          parseISO(roundTrip.return_date_time),
+          parseISO(roundTrip.pickup_date_time),
+        ) || 1;
 
       console.log("Calculated Number of Days: ", numberOfDays);
 
@@ -481,7 +489,6 @@ export default function VendorRoundTripContent() {
     }
   };
 
-
   const handlePhaseOne = async (e) => {
     e.preventDefault();
 
@@ -505,7 +512,9 @@ export default function VendorRoundTripContent() {
     const currentDate = new Date();
 
     if (isBefore(pickupDate, currentDate)) {
-      toast.error("Pickup date and time must be from the present day or later.");
+      toast.error(
+        "Pickup date and time must be from the present day or later.",
+      );
       return;
     }
 
